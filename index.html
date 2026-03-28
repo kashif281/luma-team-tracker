@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Team Tracker — Luma Visuals</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── THEMES ── */
+[data-theme="dark"]{--bg:#0d0d0d;--s1:#141414;--s2:#1a1a1a;--s3:#212121;--s4:#2a2a2a;--text:#f0f0f0;--text2:#c0c0c0;--text3:#888;--text4:#555;--border:#2a2a2a;--border2:#333;--lbg:#0a0a0a;--shad:rgba(0,0,0,.65);}
+[data-theme="light"]{--bg:#f0f0f0;--s1:#ffffff;--s2:#f5f5f5;--s3:#e8e8e8;--s4:#d8d8d8;--text:#1a1a1a;--text2:#444;--text3:#777;--text4:#aaa;--border:#ddd;--border2:#ccc;--lbg:#e0e0e0;--shad:rgba(0,0,0,.14);}
+[data-theme="beige"]{--bg:#ede8df;--s1:#faf6ef;--s2:#f0ebe1;--s3:#e5ddd2;--s4:#d5cdc0;--text:#2c2017;--text2:#5a4838;--text3:#8a7a6a;--text4:#b5a898;--border:#d8d0c5;--border2:#c8bfb0;--lbg:#e5ddd2;--shad:rgba(0,0,0,.11);}
+[data-theme="gray"]{--bg:#282828;--s1:#333;--s2:#3a3a3a;--s3:#424242;--s4:#4c4c4c;--text:#e8e8e8;--text2:#bbb;--text3:#888;--text4:#666;--border:#3e3e3e;--border2:#4a4a4a;--lbg:#222;--shad:rgba(0,0,0,.5);}
+:root{--green:#4a7c59;--green2:#3a6347;--red:#c0392b;--blue:#2980b9;--amber:#e6a817;--font:'Noto Sans',sans-serif;--r:8px;--rl:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:14px;transition:background .2s,color .2s;}
+
+/* ── LOGIN ── */
+.ls{position:fixed;inset:0;background:var(--lbg);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.ls.hidden{display:none;}
+.lb{background:var(--s1);border:1px solid var(--border2);border-radius:16px;width:400px;height:420px;box-shadow:0 24px 60px var(--shad);display:flex;flex-direction:column;}
+.l-header{padding:40px 44px 0;flex-shrink:0;}
+.l-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px;justify-content:center;}
+.l-lv{width:44px;height:44px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:serif;font-size:20px;font-weight:700;color:#fff;}
+.l-brand{font-size:21px;font-weight:700;color:var(--text);}
+.l-brand span{color:var(--green);}
+.l-sub{text-align:center;font-size:12px;color:var(--text3);margin-bottom:0;}
+.l-body{padding:20px 44px 40px;}
+.ltabs{display:flex;background:var(--s3);border-radius:8px;padding:3px;margin-top:20px;margin-bottom:18px;gap:3px;}
+.ltab{flex:1;padding:8px;border:none;background:transparent;border-radius:6px;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;}
+.ltab.on{background:var(--s1);color:var(--text);box-shadow:0 1px 4px var(--shad);}
+.lf{margin-bottom:13px;}
+.lf label{display:block;font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.lf input,.lf select{width:100%;background:var(--s3);border:1.5px solid var(--border2);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color .15s;}
+.lf input:focus,.lf select:focus{border-color:var(--green);}
+.lbtn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:5px;transition:background .15s;}
+.lbtn:hover{background:var(--green2);}
+.lerr{color:#ff6b6b;font-size:11px;margin-top:9px;text-align:center;display:none;padding:7px;background:rgba(192,57,43,.1);border-radius:6px;border:1px solid rgba(192,57,43,.2);}
+.saved-wrap{margin-bottom:11px;}
+.saved-lbl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.saved-chip{display:inline-flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border2);border-radius:14px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.8px;margin:2px;transition:all .14s;}
+.saved-chip:hover{border-color:var(--green);color:var(--green);}
+.sc-rm{font-size:11px;color:var(--text4);font-weight:400;margin-left:2px;}
+.sc-rm:hover{color:#e74c3c;}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
+.tb-logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tb-lv{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:serif;font-size:13px;font-weight:700;color:#fff;}
+.tb-brand{font-size:13px;font-weight:700;color:var(--text);}
+.tb-brand span{color:var(--green);}
+.t-pills{display:flex;gap:2px;margin-left:6px;}
+.tpill{padding:5px 12px;border-radius:6px;border:none;background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;}
+.tpill:hover{background:var(--s3);color:var(--text);}
+.tpill.on{background:var(--green);color:#fff;}
+.t-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
+.tbtn{padding:6px 12px;border-radius:7px;border:none;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;transition:all .15s;}
+.tbtn-green{background:var(--green);color:#fff;}.tbtn-green:hover{background:var(--green2);}
+.tbtn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}.tbtn-ghost:hover{border-color:var(--green);color:var(--green);}
+.tbtn-sm{padding:4px 10px;font-size:11px;}
+.tbtn-red{background:rgba(192,57,43,.12);color:#e74c3c;border:1px solid rgba(192,57,43,.2);}.tbtn-red:hover{background:rgba(192,57,43,.22);}
+.tbtn-amber{background:rgba(230,168,23,.12);color:#e6a817;border:1px solid rgba(230,168,23,.25);}.tbtn-amber:hover{background:rgba(230,168,23,.22);}
+.uchip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:18px;background:var(--s3);border:1px solid var(--border2);cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);}
+.udot{width:7px;height:7px;border-radius:50%;}
+/* Theme dropdown */
+.th-wrap{position:relative;}
+.th-btn{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:7px;background:var(--s3);border:1px solid var(--border2);cursor:pointer;font-size:11px;color:var(--text3);user-select:none;}
+.th-btn:hover{border-color:var(--green);}
+.th-drop{position:absolute;top:calc(100%+5px);right:0;background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:5px;min-width:150px;box-shadow:0 8px 24px var(--shad);z-index:300;display:none;}
+.th-drop.open{display:block;}
+.tg-lbl{font-size:9px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.5px;padding:5px 8px 2px;}
+.t-opt{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:background .1s;}
+.t-opt:hover{background:var(--s3);}
+.t-opt.on{background:var(--green);color:#fff;}
+.t-sw{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1);}
+
+/* ── LAYOUT ── */
+.app{flex:1;display:flex;overflow:hidden;}
+.sidebar{width:200px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+.sb-sec{padding:12px 9px 5px;}
+.sb-lbl{font-size:9px;color:var(--text4);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px;padding:0 6px;}
+.sb-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;cursor:pointer;transition:all .14s;font-size:12px;font-weight:500;color:var(--text3);margin-bottom:1px;}
+.sb-item:hover{background:var(--s3);color:var(--text);}
+.sb-item.on{background:var(--green);color:#fff;}
+.sb-item.on .sb-ct{background:rgba(255,255,255,.2);color:#fff;}
+.sb-ct{margin-left:auto;font-size:9px;background:var(--s4);padding:2px 6px;border-radius:9px;color:var(--text3);font-weight:600;}
+.sb-div{height:1px;background:var(--border);margin:5px 10px;}
+.ed-sb-row{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;cursor:pointer;transition:background .14s;margin-bottom:1px;}
+.ed-sb-row:hover{background:var(--s3);}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;}
+.ed-sb-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ed-sb-ct{font-size:10px;color:var(--text3);}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── BOARD ── */
+.board-bar{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;background:var(--s1);flex-shrink:0;}
+.bb-inp{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:6px 10px;font-family:var(--font);font-size:12px;outline:none;}
+.bb-inp:focus{border-color:var(--green);}
+.board-scroll{flex:1;overflow-x:auto;overflow-y:hidden;padding:14px;}
+.board{display:flex;gap:12px;align-items:flex-start;min-width:max-content;height:100%;}
+.col{width:252px;flex-shrink:0;display:flex;flex-direction:column;max-height:100%;background:var(--s1);border-radius:var(--rl);border:1px solid var(--border);}
+.col-head{padding:11px 13px;display:flex;align-items:center;gap:7px;}
+.col-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.col-name{font-size:12px;font-weight:700;flex:1;color:var(--text);}
+.col-ct{font-size:9px;color:var(--text3);background:var(--s3);padding:2px 6px;border-radius:9px;font-weight:600;border:1px solid var(--border2);}
+.col-body{flex:1;overflow-y:auto;padding:5px 7px;display:flex;flex-direction:column;gap:6px;min-height:50px;}
+.col-body::-webkit-scrollbar{width:3px;}
+.col-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.add-c-btn{margin:3px 7px 7px;padding:7px;border:1px dashed var(--border2);border-radius:7px;background:transparent;color:var(--text4);font-size:11px;cursor:pointer;font-family:var(--font);transition:all .14s;text-align:center;}
+.add-c-btn:hover{border-color:var(--green);color:var(--green);}
+.col-body.drag-over{background:rgba(74,124,89,.09);border-radius:7px;}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px;cursor:grab;transition:border-color .16s,box-shadow .16s;position:relative;user-select:none;}
+.card:hover{border-color:var(--green);box-shadow:0 3px 12px rgba(74,124,89,.12);}
+.card:active{cursor:grabbing;}
+.card.dragging{opacity:.35;transform:rotate(1.5deg);}
+.card-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.card-title{font-size:11px;font-weight:600;line-height:1.4;color:var(--text);margin-bottom:7px;padding-left:6px;}
+.badge{font-size:9px;padding:2px 6px;border-radius:7px;font-weight:700;display:inline-block;margin-bottom:7px;}
+.b-sig{background:rgba(74,124,89,.18);color:#4a9c6a;}
+.b-sim{background:rgba(41,128,185,.18);color:#3498db;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;}
+.c-inds{display:flex;gap:3px;align-items:center;flex-wrap:wrap;}
+.c-ind{padding:2px 5px;border-radius:3px;font-weight:600;font-size:9px;}
+.due-ok{background:rgba(74,124,89,.13);color:#4a9c6a;}
+.due-soon{background:rgba(183,121,15,.13);color:#e6a817;}
+.due-over{background:rgba(192,57,43,.13);color:#e74c3c;}
+
+/* ── PAGE WRAP ── */
+.pg{flex:1;overflow:auto;padding:22px;}
+.ptitle{font-size:18px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.psub{font-size:12px;color:var(--text3);margin-bottom:18px;}
+
+/* ── TRACKER ── */
+.pbar{display:flex;gap:7px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.pbar select{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:6px 11px;font-family:var(--font);font-size:12px;outline:none;}
+.ed-tc{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:11px;}
+.ed-tc-top{display:flex;align-items:center;gap:13px;margin-bottom:13px;}
+.ed-tc-name{font-size:14px;font-weight:700;color:var(--text);}
+.ed-tc-email{font-size:11px;color:var(--text3);margin-top:2px;}
+.ed-tc-pay{font-size:20px;font-weight:700;color:var(--green);}
+.ed-tc-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.stat-row{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+.stat-b{text-align:center;background:var(--s3);border-radius:7px;padding:9px 12px;flex:1;min-width:60px;}
+.stat-v{font-size:16px;font-weight:700;color:var(--green);}
+.stat-l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
+.stat-b.tot{background:var(--green);}.stat-b.tot .stat-v,.stat-b.tot .stat-l{color:#fff;}
+.tc-projs{display:flex;gap:5px;flex-wrap:wrap;}
+.tc-proj{background:var(--s3);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;cursor:pointer;transition:border-color .14s;}
+.tc-proj:hover{border-color:var(--green);}
+.tc-proj-title{font-size:10px;font-weight:600;color:var(--text);}
+.tc-proj-meta{font-size:9px;color:var(--text3);}
+
+/* ── ARCHIVE ── */
+.arch-grid{display:grid;gap:7px;}
+.arch-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:11px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:border-color .14s;}
+.arch-card:hover{border-color:var(--green);}
+.arch-title{font-size:12px;font-weight:600;color:var(--text);}
+.arch-meta{font-size:10px;color:var(--text3);margin-top:2px;}
+.arch-status{font-size:9px;padding:2px 7px;border-radius:9px;font-weight:700;}
+
+/* ── ADMIN ── */
+.adm-sec{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:12px;}
+.adm-title{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:13px;}
+.rate-row{background:var(--s3);border-radius:7px;padding:12px 14px;margin-bottom:9px;}
+.rate-top{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.rate-name{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.rfields{display:flex;gap:9px;flex-wrap:wrap;}
+.rf{flex:1;min-width:100px;}
+.rf label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:3px;}
+.rf input,.rf select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:6px 9px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;}
+.rf input:focus,.rf select:focus{border-color:var(--green);}
+.rf input[readonly]{color:var(--green);font-weight:700;}
+.wh-info{background:rgba(41,128,185,.07);border:1px solid rgba(41,128,185,.18);border-radius:7px;padding:10px 12px;font-size:11px;color:#7ab3ff;line-height:1.8;margin-bottom:10px;}
+.wh-info code{font-family:monospace;background:rgba(41,128,185,.15);padding:1px 5px;border-radius:3px;font-size:10px;}
+.wh-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s3);border-radius:6px;margin-bottom:5px;}
+.wh-url{font-size:10px;color:var(--blue);font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wh-badge{font-size:9px;padding:2px 6px;background:rgba(41,128,185,.13);color:#7ab3ff;border-radius:4px;white-space:nowrap;}
+.wh-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:13px;padding:1px 4px;}
+.wh-del:hover{color:var(--red);}
+.client-item{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--s3);border-radius:6px;margin-bottom:5px;}
+.ci-name{font-size:12px;font-weight:600;color:var(--text);flex:1;}
+.ci-email{font-size:10px;color:var(--text3);}
+.ci-code{font-family:monospace;font-size:11px;color:var(--green);font-weight:700;letter-spacing:1.5px;}
+
+/* ── MODAL ── */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(3px);z-index:400;display:none;align-items:center;justify-content:center;padding:14px;}
+.mbg.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:14px;width:720px;max-width:100%;max-height:95vh;overflow-y:auto;box-shadow:0 28px 70px var(--shad);animation:mIn .16s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.mhead{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mtitle{font-size:15px;font-weight:700;color:var(--text);}
+.mclose{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;}
+.mclose:hover{color:var(--text);}
+.mbody{padding:16px 20px;display:flex;flex-direction:column;gap:13px;}
+.mcols{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.mcols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.mfoot{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.field input,.field select,.field textarea{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:8px 11px;font-family:var(--font);font-size:12px;outline:none;transition:border-color .14s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);}
+.field input:disabled,.field select:disabled,.field textarea:disabled{opacity:.6;cursor:not-allowed;}
+.field textarea{resize:vertical;min-height:60px;}
+.field select option{background:var(--s2);}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.sf{display:flex;gap:4px;flex-wrap:wrap;}
+.sf-step{padding:5px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;transition:all .14s;border:1px solid transparent;color:var(--text3);background:var(--s3);}
+.sf-step.on{color:#fff;}
+.chat-box{background:var(--s3);border:1px solid var(--border2);border-radius:7px;padding:10px;max-height:140px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-bottom:7px;}
+.msg{display:flex;gap:7px;}
+.msg-from{font-size:9px;font-weight:700;color:var(--text3);}
+.msg-text{font-size:11px;line-height:1.45;color:var(--text);}
+.msg-time{font-size:9px;color:var(--text4);}
+.ci{display:flex;gap:6px;}
+.ci input{flex:1;background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:7px 10px;font-family:var(--font);font-size:11px;outline:none;}
+.ci input:focus{border-color:var(--green);}
+.payroll-row{display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(74,124,89,.09);border:1px solid var(--green);border-radius:7px;font-size:12px;font-weight:500;color:#4a9c6a;}
+.payroll-row input{width:15px;height:15px;accent-color:var(--green);}
+.tip-ro{background:rgba(230,168,23,.08);border:1px solid rgba(230,168,23,.22);border-radius:7px;padding:8px 11px;font-size:13px;color:var(--amber);font-weight:600;}
+.tip-ro-lbl{font-size:9px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+/* Timeline */
+.timeline-wrap{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:13px;align-items:flex-start;padding:8px 0;position:relative;}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:26px;bottom:-2px;width:1px;background:var(--border2);}
+.tl-dot{width:23px;height:23px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;margin-top:2px;}
+.tl-content{flex:1;}
+.tl-label{font-size:12px;font-weight:600;color:var(--text);}
+.tl-meta{font-size:10px;color:var(--text3);margin-top:2px;}
+/* Revision complete button */
+.rev-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:all .15s;}
+.rev-btn-do{background:rgba(230,168,23,.15);color:var(--amber);border:1px solid rgba(230,168,23,.3);}
+.rev-btn-do:hover{background:rgba(230,168,23,.25);}
+.rev-btn-done{background:rgba(74,124,89,.15);color:#4a9c6a;border:1px solid rgba(74,124,89,.3);cursor:default;}
+/* Autocomplete */
+.ac-wrap{position:relative;}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--s1);border:1px solid var(--border2);border-radius:7px;max-height:170px;overflow-y:auto;z-index:500;box-shadow:0 7px 20px var(--shad);display:none;}
+.ac-list.open{display:block;}
+.ac-item{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--text);display:flex;align-items:center;gap:8px;}
+.ac-item:hover{background:var(--s3);}
+.ac-name{font-weight:600;}
+.ac-meta{font-size:10px;color:var(--text3);}
+
+/* ── CLIENT PORTAL ── */
+.portal-bg{position:fixed;inset:0;background:#081510;z-index:600;display:none;flex-direction:column;align-items:center;overflow-y:auto;}
+.portal-bg.open{display:flex;}
+.p-login-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:40px 44px;width:420px;text-align:center;backdrop-filter:blur(10px);margin:auto;}
+.p-lv{width:56px;height:56px;background:var(--green);border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:serif;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;}
+.p-brand{font-size:22px;font-weight:700;color:#fff;}
+.p-brand span{color:#7bc89a;}
+.p-tag{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;margin-bottom:22px;}
+.p-saved{margin-bottom:12px;}
+.p-saved-lbl{font-size:9px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.p-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:5px 11px;cursor:pointer;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.8px;margin:2px;transition:all .14s;}
+.p-chip:hover{border-color:#7bc89a;}
+.p-chip-rm{font-size:10px;color:rgba(255,255,255,.25);font-weight:400;}
+.p-chip-rm:hover{color:#ff8a8a;}
+.p-inp{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.13);color:#fff;border-radius:10px;padding:13px 17px;font-family:var(--font);font-size:15px;outline:none;text-align:center;letter-spacing:3px;font-weight:700;transition:border-color .18s;margin-bottom:11px;}
+.p-inp:focus{border-color:#7bc89a;}
+.p-inp::placeholder{color:rgba(255,255,255,.2);letter-spacing:0;font-size:13px;}
+.p-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:background .14s;}
+.p-btn:hover{background:var(--green2);}
+.p-err{color:#ff8a8a;font-size:11px;margin-top:7px;display:none;}
+.p-back{background:none;border:none;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer;margin-top:14px;font-family:var(--font);}
+/* Portal dash */
+.p-dash{width:100%;max-width:860px;padding:28px 22px;margin:0 auto;}
+.p-dash-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
+.p-dash-title{font-size:22px;font-weight:700;color:#fff;}
+.p-dash-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;margin-bottom:22px;}
+/* Portal project list */
+.p-proj-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;margin-bottom:10px;overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.p-proj-item:hover{border-color:rgba(123,200,154,.35);}
+.p-proj-item.open-detail{border-color:rgba(123,200,154,.4);}
+.p-proj-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;}
+.p-proj-title{font-size:15px;font-weight:700;color:#fff;}
+.p-proj-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+.p-pill{display:inline-flex;align-items:center;padding:4px 11px;border-radius:18px;font-size:11px;font-weight:700;}
+.p-chevron{font-size:12px;color:rgba(255,255,255,.35);margin-left:10px;transition:transform .2s;}
+.p-chevron.up{transform:rotate(180deg);}
+/* Portal project detail panel */
+.p-proj-detail{display:none;padding:0 20px 18px;border-top:1px solid rgba(255,255,255,.07);}
+.p-proj-detail.open{display:block;}
+.p-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.p-field-group{display:flex;flex-direction:column;gap:3px;}
+.p-fl{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.4px;}
+.p-fv{font-size:13px;font-weight:500;color:#fff;}
+.p-fio{background:rgba(41,128,185,.13);border:1px solid rgba(41,128,185,.22);border-radius:9px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .18s;margin-bottom:14px;}
+.p-fio:hover{background:rgba(41,128,185,.22);}
+.p-tl-wrap{margin-bottom:14px;}
+.p-tl-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.p-tl-item{display:flex;gap:11px;align-items:flex-start;padding:6px 0;position:relative;}
+.p-tl-item:not(:last-child)::after{content:'';position:absolute;left:10px;top:22px;bottom:-2px;width:1px;background:rgba(255,255,255,.1);}
+.p-tl-dot{width:21px;height:21px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;margin-top:1px;}
+.p-tl-label{font-size:12px;font-weight:600;color:#fff;}
+.p-tl-meta{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;}
+.p-chat-box{background:rgba(0,0,0,.28);border-radius:8px;padding:9px;max-height:130px;overflow-y:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:7px;}
+.p-ci{display:flex;gap:6px;}
+.p-ci input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff;border-radius:7px;padding:8px 12px;font-family:var(--font);font-size:12px;outline:none;}
+.p-ci input:focus{border-color:#7bc89a;}
+.p-ci input::placeholder{color:rgba(255,255,255,.25);}
+.p-ci-btn{padding:8px 14px;background:var(--green);color:#fff;border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;}
+.p-rev-section{background:rgba(230,168,23,.07);border:1px solid rgba(230,168,23,.2);border-radius:8px;padding:12px 15px;margin-bottom:12px;}
+.p-rev-title{font-size:11px;font-weight:700;color:var(--amber);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;}
+.p-rev-inp{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff;border-radius:7px;padding:8px 11px;font-family:var(--font);font-size:12px;outline:none;resize:vertical;min-height:55px;margin-bottom:7px;}
+.p-rev-inp:focus{border-color:var(--amber);}
+.p-rev-btn{padding:7px 14px;background:rgba(230,168,23,.2);color:var(--amber);border:1px solid rgba(230,168,23,.35);border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;}
+
+/* ── EDIT CLIENT MODAL ── */
+.ec-modal{background:var(--s1);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 28px 70px var(--shad);animation:mIn .16s ease;}
+
+/* ── TOAST / MISC ── */
+.toast{position:fixed;bottom:16px;right:16px;background:var(--s3);color:var(--text);border:1px solid var(--border2);border-radius:9px;padding:9px 16px;font-size:12px;z-index:999;display:none;box-shadow:0 5px 20px var(--shad);}
+.toast.show{display:block;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.empty{color:var(--text4);font-size:11px;padding:18px;text-align:center;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.divider{height:1px;background:var(--border);margin:10px 0;}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- LOGIN -->
+<div class="ls" id="loginScreen">
+<div class="lb">
+  <div class="l-header">
+    <div class="l-logo"><div class="l-lv">LV</div><div class="l-brand">Team <span>Tracker</span></div></div>
+    <div class="l-sub">Luma Visuals — Production Management</div>
+  </div>
+  <div class="l-body">
+    <div class="ltabs">
+      <button class="ltab on" id="lt-client" onclick="setLT('client',this)">Client Portal</button>
+      <button class="ltab" id="lt-team" onclick="setLT('team',this)">Team Login</button>
+    </div>
+    <!-- CLIENT LOGIN -->
+    <div id="clientLoginDiv">
+      <div id="loginSavedCodes"></div>
+      <div class="lf"><label>Access Code</label>
+        <input id="cl-code" style="text-align:center;letter-spacing:3px;font-weight:700;font-size:15px;" onkeydown="if(event.key==='Enter')doClientLogin()" oninput="this.value=this.value.toUpperCase()"/>
+      </div>
+      <button class="lbtn" onclick="doClientLogin()">View My Projects</button>
+      <div class="lerr" id="clientErr">Invalid access code. Please contact your Luma Visuals team.</div>
+    </div>
+    <!-- TEAM LOGIN (Supabase Auth — email + password) -->
+    <div id="teamLogin" style="display:none;">
+      <div id="step1">
+        <div class="lf"><label>Email</label><input type="email" id="li-email" autocomplete="username" placeholder="you@lumavisuals.co" onkeydown="if(event.key==='Enter')teamSignIn()"/></div>
+        <div class="lf"><label>Password</label><input type="password" id="li-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')teamSignIn()"/></div>
+        <button class="lbtn" onclick="teamSignIn()">Sign In</button>
+        <div class="lerr" id="passErr">Could not sign in.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="topbar" style="display:none;">
+  <div class="tb-logo">
+    <div class="tb-lv">LV</div>
+    <div class="tb-brand">Team <span>Tracker</span></div>
+  </div>
+  <div class="t-pills">
+    <button class="tpill on" onclick="showView('board',this)">Board</button>
+    <button class="tpill" onclick="showView('tracker',this)">Payroll Tracker</button>
+    <button class="tpill" onclick="showView('archive',this)">Archive</button>
+    <button class="tpill admin-only" onclick="showView('admin',this)" style="display:none;">Admin</button>
+  </div>
+  <div class="t-right">
+    <button class="tbtn tbtn-green tbtn-sm admin-only" onclick="openNewCard()" style="display:none;">+ New Card</button>
+    <div class="th-wrap">
+      <div class="th-btn" id="thBtn" onclick="toggleThemeDrop()"><span id="thIcon">🌙</span><span id="thLbl" style="font-size:11px;color:var(--text2);">Night</span><span style="font-size:9px;color:var(--text4);">▾</span></div>
+      <div class="th-drop" id="thDrop">
+        <div class="tg-lbl">Mode</div>
+        <div class="t-opt on" id="to-dark" onclick="setTheme('dark',this)"><div class="t-sw" style="background:#1a1a1a;"></div>Night</div>
+        <div class="t-opt" id="to-light" onclick="setTheme('light',this)"><div class="t-sw" style="background:#f0f0f0;border-color:#ccc;"></div>Day</div>
+        <div class="tg-lbl" style="margin-top:3px;">Background</div>
+        <div class="t-opt" id="to-beige" onclick="setTheme('beige',this)"><div class="t-sw" style="background:#ede8df;border-color:#d5cdc0;"></div>Warm Beige</div>
+        <div class="t-opt" id="to-gray" onclick="setTheme('gray',this)"><div class="t-sw" style="background:#3a3a3a;"></div>Cool Gray</div>
+      </div>
+    </div>
+    <div class="uchip" onclick="doLogout()"><div class="udot" id="uDot"></div><span id="uLabel"></span>&nbsp;· Sign out</div>
+  </div>
+</div>
+
+<div class="app" id="appBody" style="display:none;">
+  <div class="sidebar">
+    <div class="sb-sec">
+      <div class="sb-lbl">View</div>
+      <div class="sb-item on" onclick="setEF('',this)" id="sb-all">All Projects<span class="sb-ct" id="allCt">0</span></div>
+      <div class="sb-item" onclick="setEF('__un',this)">Unassigned</div>
+    </div>
+    <div class="sb-sec"><div class="sb-div"></div><div class="sb-lbl">Editors</div><div id="editorSidebar"></div></div>
+  </div>
+  <div class="content">
+    <!-- BOARD -->
+    <div id="view-board" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="board-bar">
+        <input class="bb-inp" id="csearch" placeholder="Search..." onkeyup="renderBoard()" style="width:180px;"/>
+        <select class="bb-inp" id="typeFilter" onchange="renderBoard()"><option value="">All Types</option><option value="signature">Signature</option><option value="simple">Simple Edit</option></select>
+      </div>
+      <div class="board-scroll"><div class="board" id="board"></div></div>
+    </div>
+    <!-- TRACKER -->
+    <div id="view-tracker" style="display:none;flex:1;overflow:hidden;">
+      <div class="pg">
+        <div class="ptitle">Payroll Tracker</div>
+        <div class="psub">Completed projects & training per editor per payroll cycle</div>
+        <div class="pbar">
+          <select id="trackerPeriod" onchange="renderTracker()"></select>
+          <button class="tbtn tbtn-ghost tbtn-sm admin-only" onclick="exportTracker()" style="display:none;">Export CSV</button>
+        </div>
+        <div id="trackerGrid"></div>
+      </div>
+    </div>
+    <!-- ARCHIVE -->
+    <div id="view-archive" style="display:none;flex:1;overflow:hidden;">
+      <div class="pg">
+        <div class="ptitle">Archive</div>
+        <div class="psub">All archived cards</div>
+        <div style="margin-bottom:12px;"><input class="bb-inp" id="archSearch" placeholder="Search archive..." onkeyup="renderArchive()" style="width:220px;"/></div>
+        <div class="arch-grid" id="archGrid"></div>
+      </div>
+    </div>
+    <!-- ADMIN -->
+    <div id="view-admin" style="display:none;flex:1;overflow:hidden;">
+      <div class="pg">
+        <div class="ptitle">Admin Panel</div>
+        <div class="psub">Editors, clients, payroll, and integrations</div>
+
+        <div class="adm-sec">
+          <div class="adm-title">Editors, Passwords & Rates</div>
+          <div id="ratesGrid"></div>
+          <div class="divider"></div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;">Add New Editor</div>
+          <div class="r2" style="margin-bottom:8px;">
+            <div class="field"><label>Name</label><input id="ne-name"/></div>
+            <div class="field"><label>Email</label><input id="ne-email" placeholder="firstname (adds @lumavisuals.co)"/></div>
+          </div>
+          <div class="r3" style="margin-bottom:8px;">
+            <div class="field"><label>Password</label><input id="ne-pass"/></div>
+            <div class="field"><label>Signature ($)</label><input id="ne-sig" type="number"/></div>
+            <div class="field"><label>Simple ($)</label><input id="ne-sim" type="number"/></div>
+          </div>
+          <button class="tbtn tbtn-green tbtn-sm" onclick="addEditor()">Add Editor</button>
+        </div>
+
+        <div class="adm-sec">
+          <div class="adm-title">Payroll — Full Breakdown (Admin Only)</div>
+          <div class="pbar" style="margin-bottom:12px;"><select id="adminPayPeriod" onchange="renderAdminPayroll()"></select></div>
+          <div id="adminPayroll"></div>
+        </div>
+
+        <div class="adm-sec">
+          <div class="adm-title">Client Directory & Access Codes</div>
+          <div id="clientList"></div>
+          <div class="divider"></div>
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;">Add New Client</div>
+          <div class="r3" style="margin-bottom:8px;">
+            <div class="field"><label>Client Name</label><input id="nc-name"/></div>
+            <div class="field"><label>Client Email</label><input id="nc-email"/></div>
+            <div class="field"><label>Notifications</label><select id="nc-notif"><option value="all">All updates</option><option value="status">Status only</option><option value="none">None</option></select></div>
+          </div>
+          <div class="field" style="margin-bottom:8px;"><label>Permanent Frame.io Link (optional)</label><input id="nc-frameio" placeholder="https://app.frame.io/..."/></div>
+          <button class="tbtn tbtn-green tbtn-sm" onclick="addClient()">Generate Code & Add</button>
+        </div>
+
+        <div class="adm-sec">
+          <div class="adm-title">Admin Password</div>
+          <div style="display:flex;gap:9px;align-items:flex-end;">
+            <div class="field" style="flex:1;"><label>New Password</label><input type="password" id="ap-new"/></div>
+            <div class="field" style="flex:1;"><label>Confirm</label><input type="password" id="ap-confirm"/></div>
+            <button class="tbtn tbtn-green tbtn-sm" style="margin-bottom:1px;" onclick="changeAdminPass()">Set</button>
+          </div>
+          <div id="ap-msg" style="font-size:11px;margin-top:6px;display:none;"></div>
+        </div>
+
+        <div class="adm-sec">
+          <div class="adm-title">Webhooks & Zapier</div>
+          <div class="wh-info">
+            <strong>Inbound URL (Zapier → new card):</strong><br>
+            <code>https://app.lumavisuals.co/api/wh/inbound/YOUR_KEY</code>
+            <button class="tbtn tbtn-ghost tbtn-sm" style="font-size:9px;margin-left:5px;" onclick="cpyWH()">Copy</button><br>
+            <strong>Zapier email-matching:</strong> Order received → match by email → assign to existing client → create card. If no email match → new client record.<br>
+            Events: <code>card.created</code> · <code>card.status_changed</code> · <code>revision.requested</code> · <code>revision.done</code> · <code>chat.message_sent</code> · <code>payroll.marked</code>
+          </div>
+          <div id="whRows"></div>
+          <div class="divider"></div>
+          <div class="r2" style="margin-bottom:8px;">
+            <div class="field"><label>Endpoint URL</label><input id="wh-url"/></div>
+            <div class="field"><label>Event</label><select id="wh-ev"><option>card.created</option><option>card.status_changed</option><option>revision.requested</option><option>revision.done</option><option>chat.message_sent</option><option>payroll.marked</option><option>* all events</option></select></div>
+          </div>
+          <div style="display:flex;gap:7px;">
+            <button class="tbtn tbtn-green tbtn-sm" onclick="addWH()">Add Webhook</button>
+            <button class="tbtn tbtn-ghost tbtn-sm" onclick="testWH()">Test Fire</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT PORTAL -->
+<div class="portal-bg" id="portalBg">
+  <div id="pLoginBox" class="p-login-box">
+    <div class="p-lv">LV</div>
+    <div class="p-brand">Luma <span>Visuals</span></div>
+    <div class="p-tag">Your creative projects, all in one place</div>
+    <div id="pSavedCodes"></div>
+    <input class="p-inp" id="pCode" placeholder="Enter access code" maxlength="8" onkeydown="if(event.key==='Enter')pLogin()" oninput="this.value=this.value.toUpperCase()"/>
+    <button class="p-btn" onclick="pLogin()">View My Projects</button>
+    <div class="p-err" id="pErr">Invalid code. Contact your Luma Visuals team.</div>
+    <button class="p-back" onclick="closePortal()">← Back</button>
+  </div>
+  <div id="pDash" class="p-dash" style="display:none;">
+    <div class="p-dash-hd">
+      <div class="p-dash-title" id="pName"></div>
+      <button class="tbtn tbtn-ghost tbtn-sm" style="color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.18);" onclick="pLogout()">Sign Out</button>
+    </div>
+    <div class="p-dash-sub">Your active projects with Luma Visuals</div>
+    <div id="pCards"></div>
+  </div>
+</div>
+
+<!-- CARD MODAL -->
+<div class="mbg" id="mbg" onclick="closeMOut(event)">
+<div class="modal">
+  <div class="mhead"><div class="mtitle" id="mTitle">New Card</div><button class="mclose" onclick="closeM()">×</button></div>
+  <div class="mbody">
+    <div><div class="sec-lbl">Status</div><div class="sf" id="sf"></div></div>
+    <!-- Revision Complete (shown when status=revision, editor view) -->
+    <div id="rev-complete-row" style="display:none;"></div>
+    <div class="mcols">
+      <div class="field"><label>Project / Shoot Name</label><input id="f-title"/></div>
+      <div class="field"><label>Project Type</label><select id="f-type"><option value="signature-timeless">Timeless & Elegant (Signature)</option><option value="signature-funky">Funky Edit (Signature)</option><option value="signature-fastpaced">Fast Paced Reel (Signature)</option><option value="simple">Simple Edit</option></select></div>
+    </div>
+    <div class="mcols">
+      <div class="field"><label>Client Name</label>
+        <div class="ac-wrap"><input id="f-client" autocomplete="off" oninput="onClientInput()" onblur="setTimeout(closeAC,170)" onfocus="onClientInput()"/><div class="ac-list" id="acList"></div></div>
+      </div>
+      <div class="field"><label>Assign Editor</label><select id="f-ed"><option value="">— unassigned —</option></select></div>
+    </div>
+    <div class="mcols">
+      <div class="field"><label>Shoot Date</label><input type="date" id="f-shootdate"/></div>
+      <div class="field"><label>Deadline / Due Date</label><input type="date" id="f-deadline"/></div>
+    </div>
+    <div class="mcols">
+      <div class="field"><label>Color Profile</label><input id="f-color"/></div>
+      <div class="field"><label>Music Type</label><select id="f-music"><option>Included</option><option>Client Provided</option><option>None</option></select></div>
+    </div>
+    <div class="mcols">
+      <div class="field"><label>Is Property Shot?</label><select id="f-property"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <!-- Tip: admin editable, editor read-only -->
+      <div id="tip-admin" class="field"><label>Tip Amount ($) <span style="font-size:9px;color:var(--text4);">admin only</span></label><input type="number" id="f-tip" min="0"/></div>
+    </div>
+    <div id="tip-editor" style="display:none;"><div class="tip-ro-lbl">Tip Amount</div><div class="tip-ro" id="tipROBox">$0.00</div></div>
+    <div class="field"><label>Details / Script</label><textarea id="f-notes"></textarea></div>
+    <div>
+      <div class="sec-lbl" style="margin-bottom:5px;">Frame.io Review Link</div>
+      <div style="display:flex;gap:7px;">
+        <input id="f-frameio" style="flex:1;background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:8px 11px;font-family:var(--font);font-size:12px;outline:none;" oninput="onFIO()"/>
+        <button class="tbtn tbtn-ghost tbtn-sm" onclick="openFIO()">Open</button>
+      </div>
+      <div id="fioSaved" style="font-size:10px;color:var(--green);margin-top:4px;display:none;">✓ Saved — visible in client portal</div>
+    </div>
+    <!-- Timeline (view only) -->
+    <div id="tl-section" style="display:none;">
+      <div class="sec-lbl" style="margin-bottom:8px;">Project Timeline</div>
+      <div class="timeline-wrap" id="tlWrap"></div>
+    </div>
+    <!-- Payroll: admin can check, editor sees badge only -->
+    <div id="payroll-admin">
+      <div class="sec-lbl" style="margin-bottom:5px;">Payroll</div>
+      <label class="payroll-row" id="payrollChkRow">
+        <input type="checkbox" id="f-payroll" onchange="onPayrollChange()"/>
+        Mark as added to payroll for this cycle
+      </label>
+      <div id="payrollDateTxt" style="font-size:10px;color:var(--text3);margin-top:4px;display:none;"></div>
+    </div>
+    <div id="payroll-editor" style="display:none;">
+      <div class="sec-lbl">Payroll Status</div>
+      <div id="payrollEditorBadge" style="display:inline-block;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;"></div>
+    </div>
+    <!-- Training hours (payroll) -->
+    <div id="training-admin" class="field" style="display:none;"><label>Training Hours (this period)</label><input type="number" id="f-training" min="0" step="0.5" placeholder="0"/></div>
+    <div>
+      <div class="sec-lbl" style="margin-bottom:7px;">Client Message Thread</div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="ci"><input id="chatIn" placeholder="" onkeydown="if(event.key==='Enter')sendMsg()"/><button class="tbtn tbtn-green tbtn-sm" onclick="sendMsg()">Send</button></div>
+      <div style="font-size:9px;color:var(--text4);margin-top:4px;">Sends email notification to client automatically.</div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <div style="display:flex;gap:6px;">
+      <button class="tbtn tbtn-red tbtn-sm" id="delBtn" onclick="deleteCard()" style="display:none;">Delete</button>
+      <button class="tbtn tbtn-ghost tbtn-sm" id="archBtn" onclick="archiveCard()" style="display:none;">Archive</button>
+    </div>
+    <div style="display:flex;gap:6px;"><button class="tbtn tbtn-ghost" onclick="closeM()">Cancel</button><button class="tbtn tbtn-green" onclick="saveCard()">Save Card</button></div>
+  </div>
+</div>
+</div>
+
+<!-- EDIT CLIENT MODAL -->
+<div class="mbg" id="ecMbg" onclick="if(event.target===this)closeEC()">
+<div class="ec-modal">
+  <div class="mhead"><div class="mtitle">Edit Client</div><button class="mclose" onclick="closeEC()">×</button></div>
+  <div class="mbody">
+    <div class="r2">
+      <div class="field"><label>Client Name</label><input id="ec-name"/></div>
+      <div class="field"><label>Client Email</label><input id="ec-email"/></div>
+    </div>
+    <div class="field"><label>Permanent Frame.io Link (shows in all their projects)</label><input id="ec-frameio" placeholder="https://app.frame.io/..."/></div>
+    <div class="r2">
+      <div class="field"><label>Access Code</label><input id="ec-code" readonly style="color:var(--green);font-weight:700;font-family:monospace;letter-spacing:1.5px;"/></div>
+      <div class="field"><label>Notifications</label><select id="ec-notif"><option value="all">All updates</option><option value="status">Status only</option><option value="none">None</option></select></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="tbtn tbtn-red tbtn-sm" onclick="deleteClient()">Delete Client</button>
+    <div style="display:flex;gap:6px;"><button class="tbtn tbtn-ghost" onclick="closeEC()">Cancel</button><button class="tbtn tbtn-green" onclick="saveClient()">Save</button></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="hidden" id="f-code"/>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────────────
+const STATUSES=[
+  {id:'not_started',    label:'Not Started',          color:'#7a7a9a'},
+  {id:'in_progress',    label:'In Progress',          color:'#2980b9'},
+  {id:'waiting',        label:'Waiting For Approval', color:'#e67e22'},
+  {id:'on_frameio',     label:'Uploaded on Frame.io', color:'#8e44ad'},
+  {id:'revision',       label:'Revision Round',       color:'#c0392b'},
+  {id:'done',           label:'Done',                 color:'#27ae60'},
+  {id:'invoiced',       label:'Invoiced',             color:'#16a085'},
+];
+const AVC=['#4a7c59','#2980b9','#e67e22','#8e44ad','#c0392b','#16a085','#d35400','#7f8c8d'];
+const TYPE_MAP={
+  'signature-timeless': {label:'Timeless & Elegant',  cat:'signature'},
+  'signature-funky':    {label:'Funky Edit',           cat:'signature'},
+  'signature-fastpaced':{label:'Fast Paced Reel',      cat:'signature'},
+  'simple':             {label:'Simple Edit',           cat:'simple'},
+};
+const WEBHOOKS_EVENTS=['card.created','card.status_changed','revision.requested','revision.done','chat.message_sent','payroll.marked','* all events'];
+// Supabase — replace with your Project URL + anon key (Settings → API)
+const SB_URL='https://paqxkglexwmzspkrgugr.supabase.co';
+const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhcXhrZ2xleHdtenNwa3JndWdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTI3OTEsImV4cCI6MjA5MDI2ODc5MX0.2-qVKxEw9xITyDuXqHgZm9JDG4tUGuXnjrDjFuprN2E'
+let supabase=null;
+let sbReady=false;
+let cardsChannel=null;
+
+// ─── PAYROLL PERIODS (auto-rolling, bi-weekly Sat→Fri) ───────────────
+function genPeriods(){
+  const ps=[];
+  const anchor=new Date('2026-03-27T12:00:00'); // known period-end Friday
+  for(let i=-14;i<=52;i++){
+    const end=new Date(anchor);end.setDate(anchor.getDate()+i*14);
+    const start=new Date(end);start.setDate(end.getDate()-13);
+    // Only include periods where any part falls within 2026
+    if(end.getFullYear()<2026||start.getFullYear()>2026)continue;
+    const key='p'+start.toISOString().split('T')[0];
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const fmtY=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    ps.push({key,start:start.toISOString().split('T')[0],end:end.toISOString().split('T')[0],label:`${fmt(start)} – ${fmtY(end)}`});
+  }
+  return ps;
+}
+const ALL_PERIODS=genPeriods();
+function currPKey(){
+  const t=new Date().toISOString().split('T')[0];
+  const p=ALL_PERIODS.find(x=>t>=x.start&&t<=x.end);
+  return p?p.key:ALL_PERIODS[14].key;
+}
+function inPeriod(card,pkey){
+  const p=ALL_PERIODS.find(x=>x.key===pkey);
+  if(!p||!card.payrollDate)return false;
+  return card.payrollDate>=p.start&&card.payrollDate<=p.end;
+}
+function populatePeriodSelects(){
+  const cpk=currPKey();
+  const opts=ALL_PERIODS.map(p=>`<option value="${p.key}"${p.key===cpk?' selected':''}>${p.label}${p.key===cpk?' (Current)':''}</option>`).join('');
+  ['trackerPeriod','adminPayPeriod'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+// ─── STATE (loaded from Supabase after sign-in) ───────────────────────
+let S={
+  role:null,currentEditorId:null,
+  editors:[],
+  nextEd:8,
+  trainingHours:{},
+  cards:[],
+  nextId:1,
+  clients:[],
+  nextClientId:1,
+  webhooks:[],
+  nextWH:1,
+  eid:null, ef:'', editingClientId:null,
+};
+let cc={client:[]};
+let draggedId=null;
+
+// ─── UTILS ────────────────────────────────────────────────────────────
+function avEl(name,color,sz){const ini=(name||'?').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase();const s=sz||28;return `<div class="av" style="width:${s}px;height:${s}px;min-width:${s}px;background:${color};font-size:${Math.round(s*.38)}px;">${ini}</div>`;}
+function avc(name){let h=0;for(const c of(name||''))h=(h*31+c.charCodeAt(0))%AVC.length;return AVC[h];}
+function stById(id){return STATUSES.find(s=>s.id===id)||STATUSES[0];}
+function edById(id){return S.editors.find(e=>e.id===id)||null;}
+function clientByCode(code){return S.clients.find(c=>c.code===code)||null;}
+function clientByEmail(email){return S.clients.find(c=>c.email&&c.email.toLowerCase()===email.toLowerCase())||null;}
+function clientByName(name){return S.clients.find(c=>c.name.toLowerCase()===name.toLowerCase())||null;}
+function fd(d){if(!d)return '';try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return d;}}
+function daysUntil(d){if(!d)return null;return Math.ceil((new Date(d+'T23:59:59')-new Date())/86400000);}
+function toast(msg,col){const t=document.getElementById('toast');t.textContent=msg;if(col)t.style.borderColor=col;else t.style.borderColor='';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function rk(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const a=()=>c[Math.floor(Math.random()*c.length)];return a()+a()+a()+'-'+Math.floor(1000+Math.random()*9000);}
+function typeInfo(tid){return TYPE_MAP[tid]||{label:'Unknown',cat:'simple'};}
+function typeCat(tid){return typeInfo(tid).cat;}
+function isAdmin(){return S.role==='admin';}
+function today(){return new Date().toISOString().split('T')[0];}
+
+// ─── SUPABASE ─────────────────────────────────────────────────────────
+async function initSupabase(){
+  if(!SB_URL||SB_URL.includes('__SUPABASE')||!SB_ANON||SB_ANON.includes('__SUPABASE')){console.warn('Set SB_URL and SB_ANON at top of script');return;}
+  const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');
+  supabase=createClient(SB_URL,SB_ANON);sbReady=true;
+  const {data:{session}}=await supabase.auth.getSession();
+  if(session) await applySession(session);
+}
+async function applySession(session){
+  const md=session.user?.user_metadata||{};
+  const role=md.role||'editor';
+  const editorId=role==='admin'?null:(md.editor_id||null);
+  await bootstrapData();
+  enterApp(role,editorId);
+  subscribeCardsRealtime();
+}
+async function bootstrapData(){
+  if(!supabase)return;
+  await Promise.all([loadEditors(),loadClients(),loadCards(),loadWebhooks(),loadTrainingHours()]);
+}
+async function loadEditors(){
+  const {data,error}=await supabase.from('editors').select('*').order('legacy_key');
+  if(error){console.error(error);return;}
+  S.editors=(data||[]).filter(r=>r.legacy_key).map(r=>({id:r.legacy_key,dbId:r.id,name:r.name,email:r.email,color:r.color||'#4a7c59',rates:{signature:Number(r.rate_signature)||0,simple:Number(r.rate_simple)||0},trainingRate:Number(r.rate_training)||20}));
+}
+async function loadClients(){
+  const {data,error}=await supabase.from('clients').select('*').order('name');
+  if(error){console.error(error);return;}
+  S.clients=(data||[]).map(c=>({id:c.id,name:c.name,email:c.email||'',code:c.access_code,notif:c.notif||'all',frameio:c.frameio_link||''}));
+}
+function rowToCard(row){
+  const chat=row.chat&&typeof row.chat==='object'?JSON.parse(JSON.stringify(row.chat)):{client:[]};
+  if(!chat.client)chat.client=[];
+  return{
+    id:row.id,title:row.title||'',client:row.client_name||'',status:row.status||'not_started',
+    editor:row.editors?.legacy_key||'',type:row.type||'signature-timeless',
+    shootdate:row.shoot_date||'',deadline:row.deadline||'',color:row.color_profile||'',
+    music:row.music_type||'Included',property:row.is_property?'yes':'no',tip:Number(row.tip)||0,
+    notes:row.notes||'',frameio:row.frameio_link||'',code:row.clients?.access_code||'',
+    payroll:!!row.payroll,payrollDate:row.payroll_date||null,archived:!!row.archived,
+    chat,revisionComplete:!!(row.revision_complete??row.revisionComplete),timeline:Array.isArray(row.timeline)?row.timeline:[],
+  };
+}
+async function loadCards(){
+  const {data,error}=await supabase.from('cards').select('*, editors(legacy_key), clients(access_code)').order('created_at',{ascending:false});
+  if(error){console.error(error);return;}
+  S.cards=(data||[]).map(rowToCard);
+}
+async function loadWebhooks(){
+  const {data,error}=await supabase.from('webhooks').select('*').order('created_at');
+  if(error){console.error(error);return;}
+  S.webhooks=(data||[]).map(w=>({id:w.id,url:w.url,ev:w.event,on:w.active}));
+}
+async function loadTrainingHours(){
+  const {data,error}=await supabase.from('training_hours').select('*');
+  if(error){console.error(error);return;}
+  S.trainingHours={};
+  for(const row of data||[]){
+    const ed=S.editors.find(e=>e.dbId===row.editor_id);
+    if(!ed)continue;
+    if(!S.trainingHours[ed.id])S.trainingHours[ed.id]={};
+    S.trainingHours[ed.id][row.period_key]=Number(row.hours)||0;
+  }
+}
+function subscribeCardsRealtime(){
+  if(!supabase)return;
+  if(cardsChannel) supabase.removeChannel(cardsChannel);
+  cardsChannel=supabase.channel('lv-cards').on('postgres_changes',{event:'*',schema:'public',table:'cards'},async()=>{
+    await loadCards();
+    renderBoard();renderSidebar();if(document.getElementById('view-tracker')?.style.display!=='none') renderTracker();
+    if(document.getElementById('view-archive')?.style.display!=='none') renderArchive();
+    if(isAdmin()){renderClientList();renderWH();renderAdminPayroll();}
+  }).subscribe();
+}
+function clientUuidForName(name){
+  const n=(name||'').trim().toLowerCase();
+  const c=S.clients.find(x=>x.name.toLowerCase()===n);
+  return c?c.id:null;
+}
+function editorDbId(legacy){const e=S.editors.find(x=>x.id===legacy);return e?e.dbId:null;}
+function cardToPayload(c){
+  return{
+    title:c.title,client_id:clientUuidForName(c.client),client_name:c.client,
+    editor_id:editorDbId(c.editor)||null,status:c.status,type:c.type,
+    shoot_date:c.shootdate||null,deadline:c.deadline||null,color_profile:c.color||null,
+    music_type:c.music,is_property:c.property==='yes',tip:c.tip,notes:c.notes,
+    frameio_link:c.frameio||null,payroll:c.payroll,payroll_date:c.payrollDate||null,
+    archived:!!c.archived,revision_complete:!!c.revisionComplete,
+    timeline:c.timeline||[],chat:c.chat||{client:[]},
+  };
+}
+async function teamSignIn(){
+  document.getElementById('passErr').style.display='none';
+  if(!supabase){toast('Configure Supabase URL + anon key');return;}
+  const email=document.getElementById('li-email').value.trim();
+  const password=document.getElementById('li-pass').value;
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error){document.getElementById('passErr').style.display='block';return;}
+  const {data:{session}}=await supabase.auth.getSession();
+  await applySession(session);
+}
+
+// ─── THEME ────────────────────────────────────────────────────────────
+const THEMES={dark:{icon:'🌙',label:'Night'},light:{icon:'☀️',label:'Day'},beige:{icon:'🏔',label:'Beige'},gray:{icon:'🌫',label:'Gray'}};
+function setTheme(t,el){
+  document.body.setAttribute('data-theme',t);
+  document.getElementById('thIcon').textContent=THEMES[t].icon;
+  document.getElementById('thLbl').textContent=THEMES[t].label;
+  document.querySelectorAll('.t-opt').forEach(o=>o.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.getElementById('thDrop').classList.remove('open');
+  try{localStorage.setItem('lv-theme',t);}catch(e){}
+}
+function toggleThemeDrop(){document.getElementById('thDrop').classList.toggle('open');}
+document.addEventListener('click',e=>{const tb=document.getElementById('thBtn');if(tb&&!tb.contains(e.target))document.getElementById('thDrop').classList.remove('open');});
+try{const t=localStorage.getItem('lv-theme');if(t&&THEMES[t]){document.body.setAttribute('data-theme',t);const el=document.getElementById('to-'+t);if(el){document.querySelectorAll('.t-opt').forEach(o=>o.classList.remove('on'));el.classList.add('on');document.getElementById('thIcon').textContent=THEMES[t].icon;document.getElementById('thLbl').textContent=THEMES[t].label;}}}catch(e){}
+
+// ─── SAVED CODES (localStorage) ───────────────────────────────────────
+function getSavedCodes(){try{return JSON.parse(localStorage.getItem('lv-codes')||'[]');}catch(e){return[];}}
+function saveCodeLS(code,name){let a=getSavedCodes();if(!a.find(x=>x.code===code))a.push({code,name});try{localStorage.setItem('lv-codes',JSON.stringify(a));}catch(e){}}
+function removeCodeLS(code){let a=getSavedCodes().filter(x=>x.code!==code);try{localStorage.setItem('lv-codes',JSON.stringify(a));}catch(e){}}
+function renderSavedChips(containerId,fillId){
+  const saved=getSavedCodes();const div=document.getElementById(containerId);if(!div)return;
+  if(!saved.length){div.style.display='none';return;}
+  div.style.display='block';
+  const cls=containerId.startsWith('p')&&containerId!='pSavedCodes'?'saved-chip':'p-chip';
+  div.innerHTML=(containerId==='loginSavedCodes'?`<div class="saved-lbl">Saved codes</div>`:`<div class="p-saved-lbl">Saved codes</div>`)+
+    saved.map(s=>`<span class="${containerId==='loginSavedCodes'?'saved-chip':'p-chip'}" onclick="document.getElementById('${fillId}').value='${s.code}'">${s.code} <span style="opacity:.55;font-weight:400;letter-spacing:0">${s.name}</span><span class="${containerId==='loginSavedCodes'?'sc-rm':'p-chip-rm'}" onclick="event.stopPropagation();removeCodeLS('${s.code}');renderSavedChips('${containerId}','${fillId}')">×</span></span>`).join('');
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────
+let loginMode='client';
+function setLT(mode,el){
+  loginMode=mode;
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  document.getElementById('clientLoginDiv').style.display=mode==='client'?'block':'none';
+  document.getElementById('teamLogin').style.display=mode==='team'?'block':'none';
+  if(mode==='client')renderSavedChips('loginSavedCodes','cl-code');
+}
+async function doClientLogin(){
+  const code=document.getElementById('cl-code').value.trim().toUpperCase();
+  document.getElementById('clientErr').style.display='none';
+  if(!supabase||!sbReady){toast('Loading… try again.');await initSupabase();if(!sbReady)return;}
+  const {data:clInfo,error:e1}=await supabase.rpc('portal_client_by_code',{p_code:code});
+  if(e1||!clInfo){document.getElementById('clientErr').style.display='block';return;}
+  const {data:cardsRaw,error:e2}=await supabase.rpc('portal_cards_by_code',{p_code:code});
+  if(e2){document.getElementById('clientErr').style.display='block';return;}
+  const list=Array.isArray(cardsRaw)?cardsRaw:[];
+  const prev=S.cards;
+  S.cards=list.map(rowToCard);
+  const cl={name:clInfo.name,code:clInfo.access_code,email:clInfo.email||'',frameio:clInfo.frameio_link||''};
+  document.getElementById('loginScreen').classList.add('hidden');
+  openPortalDirect(code,cl);
+  window._portalSessionRestore=()=>{S.cards=prev;};
+}
+function enterApp(role,editorId){
+  S.role=role;S.currentEditorId=editorId;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('appBody').style.display='flex';
+  const admin=isAdmin();
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=admin?'':'none');
+  document.getElementById('delBtn').style.display='none';
+  document.getElementById('archBtn').style.display='none';
+  document.getElementById('uDot').style.background=admin?'var(--green)':'var(--blue)';
+  const ed=edById(editorId);
+  document.getElementById('uLabel').textContent=admin?'Admin':(ed?ed.name:'?');
+  document.getElementById('tip-admin').style.display=admin?'':'none';
+  document.getElementById('tip-editor').style.display=admin?'none':'';
+  document.getElementById('payroll-admin').style.display=admin?'':'none';
+  document.getElementById('payroll-editor').style.display=admin?'none':'';
+  document.getElementById('training-admin').style.display=admin?'':'none';
+  populateEdSel();populatePeriodSelects();renderSidebar();renderBoard();
+  if(admin){renderAdminPayroll();}
+  document.getElementById('li-pass').value='';
+  document.getElementById('passErr').style.display='none';
+}
+async function doLogout(){
+  if(!confirm('Sign out of Team Tracker?'))return;
+  if(supabase){if(cardsChannel){supabase.removeChannel(cardsChannel);cardsChannel=null;}await supabase.auth.signOut();}
+  S.role=null;S.currentEditorId=null;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('appBody').style.display='none';
+}
+function changeAdminPass(){
+  const msg=document.getElementById('ap-msg');
+  msg.style.display='block';msg.style.color='var(--text3)';msg.textContent='Use Supabase Dashboard → Authentication → Users to reset passwords.';
+  setTimeout(()=>msg.style.display='none',5000);
+}
+
+// ─── VIEWS ────────────────────────────────────────────────────────────
+function showView(id,el){
+  document.querySelectorAll('.tpill').forEach(p=>p.classList.remove('on'));if(el)el.classList.add('on');
+  ['board','tracker','archive','admin'].forEach(v=>{const e=document.getElementById('view-'+v);if(e)e.style.display='none';});
+  const vEl=document.getElementById('view-'+id);if(vEl)vEl.style.display='flex';
+  if(id==='tracker'){populatePeriodSelects();renderTracker();}
+  if(id==='archive')renderArchive();
+  if(id==='admin'){populatePeriodSelects();renderRatesGrid();renderClientList();renderWH();renderAdminPayroll();}
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────
+function renderSidebar(){
+  document.getElementById('allCt').textContent=S.cards.filter(c=>!c.archived).length;
+  const admin=isAdmin();
+  document.getElementById('editorSidebar').innerHTML=S.editors.map(ed=>{
+    if(!admin&&S.currentEditorId&&ed.id!==S.currentEditorId)return '';
+    const ct=S.cards.filter(c=>!c.archived&&c.editor===ed.id).length;
+    return `<div class="ed-sb-row" onclick="setEF('${ed.id}',null)">${avEl(ed.name,ed.color,24)}<div style="flex:1;min-width:0;"><div class="ed-sb-name">${ed.name}</div><div class="ed-sb-ct">${ct} cards</div></div></div>`;
+  }).join('');
+}
+function setEF(id,el){S.ef=id;document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));if(el)el.classList.add('on');else document.getElementById('sb-all').classList.remove('on');renderBoard();}
+
+// ─── BOARD ────────────────────────────────────────────────────────────
+function renderBoard(){
+  const q=(document.getElementById('csearch')?.value||'').toLowerCase();
+  const tf=document.getElementById('typeFilter')?.value||'';
+  const admin=isAdmin();
+  const board=document.getElementById('board');board.innerHTML='';
+  STATUSES.forEach(st=>{
+    const cards=S.cards.filter(c=>{
+      if(c.archived||c.status!==st.id)return false;
+      if(!admin&&S.currentEditorId&&c.editor!==S.currentEditorId)return false;
+      if(S.ef==='__un'&&c.editor)return false;
+      if(S.ef&&S.ef!=='__un'&&c.editor!==S.ef)return false;
+      if(q&&!c.client.toLowerCase().includes(q)&&!c.title.toLowerCase().includes(q))return false;
+      if(tf&&typeCat(c.type)!==tf)return false;
+      return true;
+    });
+    const total=S.cards.filter(c=>!c.archived&&c.status===st.id).length;
+    const col=document.createElement('div');col.className='col';col.dataset.status=st.id;
+    col.innerHTML=`<div class="col-head"><div class="col-pip" style="background:${st.color}"></div><div class="col-name">${st.label}</div><div class="col-ct">${total}</div></div>
+      <div class="col-body" id="col-${st.id}" data-status="${st.id}">${cards.map(cardHTML).join('')||'<div class="empty">No cards</div>'}</div>
+      ${admin?`<button class="add-c-btn" onclick="openNewCard('${st.id}')">+ Add card</button>`:''}`;
+    board.appendChild(col);
+  });
+  setupDragDrop();
+}
+function cardHTML(c){
+  const st=stById(c.status);const ed=edById(c.editor);const ti=typeInfo(c.type);
+  const msgs=c.chat?.client?.length||0;
+  const days=daysUntil(c.deadline);
+  let dueCls='due-ok',dueText='';
+  if(c.deadline){dueText=fd(c.deadline);dueCls=days<0?'due-over':days<=2?'due-soon':'due-ok';}
+  const revDot=c.status==='revision'&&c.revisionComplete?'<span class="c-ind" style="background:rgba(74,124,89,.15);color:#4a9c6a;">Rev ✓</span>':'';
+  return `<div class="card" draggable="true" data-id="${c.id}" onclick="openEdit('${c.id}')">
+    <div class="card-bar" style="background:${st.color}"></div>
+    <div style="padding-left:6px;margin-bottom:6px;"><span class="badge ${typeCat(c.type)==='signature'?'b-sig':'b-sim'}">${ti.label}</span></div>
+    <div class="card-title">${c.title}</div>
+    <div class="card-foot">
+      <div style="display:flex;align-items:center;gap:5px;">${ed?avEl(ed.name,ed.color,28):''}<span style="font-size:10px;color:var(--text3);">${ed?ed.name:'Unassigned'}</span></div>
+      <div class="c-inds">
+        ${c.deadline?`<span class="c-ind ${dueCls}">${dueText}</span>`:''}
+        ${msgs>0?`<span class="c-ind" style="background:rgba(74,124,89,.13);color:#4a9c6a;">${msgs}💬</span>`:''}
+        ${c.payroll?`<span class="c-ind" style="background:rgba(74,124,89,.12);color:#4a9c6a;">✓ Payroll</span>`:''}
+        ${revDot}
+      </div>
+    </div>
+  </div>`;
+}
+// ─── DRAG & DROP ──────────────────────────────────────────────────────
+function setupDragDrop(){
+  document.querySelectorAll('.card[draggable]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{draggedId=card.dataset.id;setTimeout(()=>card.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
+    card.addEventListener('dragend',()=>{card.classList.remove('dragging');document.querySelectorAll('.col-body').forEach(b=>b.classList.remove('drag-over'));});
+  });
+  document.querySelectorAll('.col-body').forEach(body=>{
+    body.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';body.classList.add('drag-over');});
+    body.addEventListener('dragleave',()=>body.classList.remove('drag-over'));
+    body.addEventListener('drop',async e=>{
+      e.preventDefault();body.classList.remove('drag-over');if(!draggedId)return;
+      const newSt=body.dataset.status;const card=S.cards.find(c=>c.id===draggedId);
+      if(card&&card.status!==newSt){
+        const oldSt=card.status;card.status=newSt;addTLEntry(card,newSt);
+        renderBoard();renderSidebar();
+        fireWH('card.status_changed',{card_id:card.id,old_status:oldSt,new_status:newSt,title:card.title});
+        if(newSt==='done')fireWH('revision.done',{card_id:card.id,title:card.title});
+        toast(`Moved to ${stById(newSt).label}`);
+        if(supabase&&S.role){
+          const {error}=await supabase.from('cards').update({status:newSt,timeline:card.timeline}).eq('id',card.id);
+          if(error){card.status=oldSt;if(card.timeline.length)card.timeline.pop();renderBoard();renderSidebar();toast(error.message,'#e74c3c');}
+        }
+      }
+      draggedId=null;
+    });
+  });
+}
+function addTLEntry(card,status){if(!card.timeline)card.timeline=[];card.timeline.push({status,date:today()});}
+
+// ─── TRACKER ─────────────────────────────────────────────────────────
+function renderTracker(){
+  const period=document.getElementById('trackerPeriod').value;
+  const admin=isAdmin();
+  const editorsToShow=admin?S.editors:S.editors.filter(e=>e.id===S.currentEditorId);
+  document.getElementById('trackerGrid').innerHTML=editorsToShow.map(ed=>{
+    const done=S.cards.filter(c=>!c.archived&&c.editor===ed.id&&(c.status==='done'||c.status==='invoiced')&&inPeriod(c,period));
+    const sigs=done.filter(c=>typeCat(c.type)==='signature');
+    const simps=done.filter(c=>typeCat(c.type)==='simple');
+    const tipTotal=done.reduce((s,c)=>s+Number(c.tip||0),0);
+    const trainHrs=((S.trainingHours[ed.id]||{})[period])||0;
+    const trainPay=trainHrs*(ed.trainingRate||20);
+    const pay=sigs.length*ed.rates.signature+simps.length*ed.rates.simple+tipTotal+trainPay;
+    const showPay=!admin;
+    const pLabel=ALL_PERIODS.find(p=>p.key===period)?.label||'';
+    return `<div class="ed-tc">
+      <div class="ed-tc-top">${avEl(ed.name,ed.color,40)}<div style="flex:1;"><div class="ed-tc-name">${ed.name}</div><div class="ed-tc-email">${ed.email}</div></div>
+      ${showPay?`<div style="text-align:right;"><div class="ed-tc-pay">$${pay.toFixed(2)}</div><div class="ed-tc-lbl">${pLabel}</div></div>`:''}
+      </div>
+      <div class="stat-row">
+        <div class="stat-b"><div class="stat-v">${sigs.length}</div><div class="stat-l">Signature</div></div>
+        <div class="stat-b"><div class="stat-v">${simps.length}</div><div class="stat-l">Simple</div></div>
+        <div class="stat-b"><div class="stat-v">${tipTotal>0?'$'+tipTotal:'—'}</div><div class="stat-l">Tips</div></div>
+        <div class="stat-b"><div class="stat-v">${trainHrs>0?trainHrs+'h':'—'}</div><div class="stat-l">Training</div></div>
+        <div class="stat-b tot"><div class="stat-v">${done.length}</div><div class="stat-l">Projects</div></div>
+      </div>
+      ${done.length?`<div class="tc-projs">${done.map(c=>{const ti=typeInfo(c.type);return `<div class="tc-proj" onclick="openEdit('${c.id}')"><div class="tc-proj-title">${c.title}</div><div class="tc-proj-meta">${c.client} · ${ti.label}</div></div>`;}).join('')}</div>`:`<div class="empty" style="padding:6px 0;">No completed projects this period.</div>`}
+    </div>`;
+  }).join('');
+}
+function exportTracker(){
+  const period=document.getElementById('trackerPeriod').value;
+  let csv='Editor,Email,Signature,Simple,Tips,Training Hrs,Total Projects\n';
+  S.editors.forEach(ed=>{
+    const done=S.cards.filter(c=>!c.archived&&c.editor===ed.id&&(c.status==='done'||c.status==='invoiced')&&inPeriod(c,period));
+    const tipTotal=done.reduce((s,c)=>s+Number(c.tip||0),0);
+    const trainHrs=((S.trainingHours[ed.id]||{})[period])||0;
+    csv+=`"${ed.name}","${ed.email}",${done.filter(c=>typeCat(c.type)==='signature').length},${done.filter(c=>typeCat(c.type)==='simple').length},$${tipTotal},${trainHrs},${done.length}\n`;
+  });
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='luma-payroll.csv';a.click();toast('CSV exported');
+}
+
+// ─── ARCHIVE ─────────────────────────────────────────────────────────
+function renderArchive(){
+  const q=(document.getElementById('archSearch')?.value||'').toLowerCase();
+  const arch=S.cards.filter(c=>c.archived&&(!q||c.title.toLowerCase().includes(q)||c.client.toLowerCase().includes(q)));
+  const grid=document.getElementById('archGrid');
+  if(!arch.length){grid.innerHTML='<div class="empty">No archived cards.</div>';return;}
+  grid.innerHTML=arch.map(c=>{const st=stById(c.status);const ti=typeInfo(c.type);const ed=edById(c.editor);return `<div class="arch-card" onclick="openEdit('${c.id}')">${avEl(c.client,avc(c.client),34)}<div style="flex:1;min-width:0;"><div class="arch-title">${c.title}</div><div class="arch-meta">${c.client} · ${ti.label}${ed?' · '+ed.name:''}${c.deadline?' · '+fd(c.deadline):''}</div></div><span class="arch-status" style="background:${st.color}20;color:${st.color}">${st.label}</span></div>`;}).join('');
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────
+async function saveEdRate(dbId,field,val){
+  if(!supabase||!dbId)return;
+  const col=field==='signature'?'rate_signature':field==='simple'?'rate_simple':'rate_training';
+  const {error}=await supabase.from('editors').update({[col]:parseFloat(val)||0}).eq('id',dbId);
+  if(error)toast(error.message);else{await loadEditors();renderRatesGrid();populateEdSel();}
+}
+function renderRatesGrid(){
+  document.getElementById('ratesGrid').innerHTML=S.editors.map(ed=>`
+    <div class="rate-row">
+      <div class="rate-top">${avEl(ed.name,ed.color,28)}<div class="rate-name">${ed.name} <span style="font-size:10px;color:var(--text3);font-weight:400;">${ed.email}</span></div>
+        <button class="tbtn tbtn-red tbtn-sm" onclick="removeEditor('${ed.dbId}')">Remove</button>
+      </div>
+      <div class="rfields">
+        <div class="rf"><label>Password</label><input type="text" readonly value="(Supabase Auth)" style="color:var(--text4);"/></div>
+        <div class="rf"><label>Signature ($)</label><input type="number" value="${ed.rates.signature}" onchange="saveEdRate('${ed.dbId}','signature',this.value)"/></div>
+        <div class="rf"><label>Simple ($)</label><input type="number" value="${ed.rates.simple}" onchange="saveEdRate('${ed.dbId}','simple',this.value)"/></div>
+        <div class="rf"><label>Training ($/hr)</label><input type="number" value="${ed.trainingRate||20}" onchange="saveEdRate('${ed.dbId}','training',this.value)"/></div>
+      </div>
+    </div>`).join('');
+}
+async function addEditor(){
+  if(!supabase)return;
+  const name=document.getElementById('ne-name').value.trim();if(!name){toast('Enter a name.');return;}
+  const emailRaw=document.getElementById('ne-email').value.trim();
+  const email=emailRaw.includes('@')?emailRaw:`${emailRaw}@lumavisuals.co`;
+  const sig=parseFloat(document.getElementById('ne-sig').value)||0;
+  const sim=parseFloat(document.getElementById('ne-sim').value)||0;
+  const cols=['#4a7c59','#2980b9','#e67e22','#8e44ad','#c0392b','#16a085','#d35400','#7f8c8d'];
+  const n=S.editors.length+1;
+  const legacy_key='e'+n;
+  const {error}=await supabase.from('editors').insert({name,email,color:cols[n%cols.length],rate_signature:sig,rate_simple:sim,rate_training:20,legacy_key}).select().single();
+  if(error){toast(error.message);return;}
+  ['ne-name','ne-email','ne-pass','ne-sig','ne-sim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  await loadEditors();renderRatesGrid();renderSidebar();populateEdSel();toast(`${name} added — set Auth user_metadata editor_id to ${legacy_key}`);
+}
+async function removeEditor(dbId){if(!confirm('Remove this editor?'))return;if(!supabase)return;const {error}=await supabase.from('editors').delete().eq('id',dbId);if(error){toast(error.message);return;}await loadEditors();renderRatesGrid();renderSidebar();populateEdSel();}
+function renderAdminPayroll(){
+  const el=document.getElementById('adminPayroll');if(!el)return;
+  const period=document.getElementById('adminPayPeriod')?.value||currPKey();
+  el.innerHTML=S.editors.map(ed=>{
+    const done=S.cards.filter(c=>!c.archived&&c.editor===ed.id&&(c.status==='done'||c.status==='invoiced')&&inPeriod(c,period));
+    const sigs=done.filter(c=>typeCat(c.type)==='signature');const simps=done.filter(c=>typeCat(c.type)==='simple');
+    const tipTotal=done.reduce((s,c)=>s+Number(c.tip||0),0);
+    const trainHrs=((S.trainingHours[ed.id]||{})[period])||0;
+    const trainPay=trainHrs*(ed.trainingRate||20);
+    const total=sigs.length*ed.rates.signature+simps.length*ed.rates.simple+tipTotal+trainPay;
+    const periodKey=period;
+    return `<div class="rate-row">
+      <div class="rate-top">${avEl(ed.name,ed.color,28)}<div class="rate-name">${ed.name}</div><div style="margin-left:auto;font-size:18px;font-weight:700;color:var(--green);">$${total.toFixed(2)}</div></div>
+      <div class="rfields">
+        <div class="rf"><label>Sig (${sigs.length}×$${ed.rates.signature})</label><input readonly value="$${(sigs.length*ed.rates.signature).toFixed(2)}"/></div>
+        <div class="rf"><label>Simple (${simps.length}×$${ed.rates.simple})</label><input readonly value="$${(simps.length*ed.rates.simple).toFixed(2)}"/></div>
+        <div class="rf"><label>Tips</label><input readonly value="$${tipTotal.toFixed(2)}" style="color:#e6a817;"/></div>
+        <div class="rf"><label>Training (hrs)</label><input type="number" value="${trainHrs}" min="0" step="0.5" onchange="setTraining('${ed.id}','${periodKey}',this.value)"/></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function setTraining(edId,period,val){if(!S.trainingHours[edId])S.trainingHours[edId]={};S.trainingHours[edId][period]=parseFloat(val)||0;if(!supabase)return;const dbId=editorDbId(edId);if(!dbId)return;await supabase.from('training_hours').upsert({editor_id:dbId,period_key:period,hours:parseFloat(val)||0},{onConflict:'editor_id,period_key'});}
+
+// ─── CLIENT MANAGEMENT ───────────────────────────────────────────────
+function renderClientList(){
+  document.getElementById('clientList').innerHTML=S.clients.map(cl=>`
+    <div class="client-item">
+      <div style="flex:1;min-width:0;">
+        <div class="ci-name">${cl.name}</div>
+        <div class="ci-email">${cl.email||'no email'} · ${cl.notif}${cl.frameio?' · Frame.io ✓':''}</div>
+      </div>
+      <div class="ci-code">${cl.code}</div>
+      <button class="tbtn tbtn-ghost tbtn-sm" onclick="openEC('${cl.id}')">Edit</button>
+    </div>`).join('')||'<div class="empty">No clients.</div>';
+}
+async function addClient(){
+  if(!supabase)return;
+  const name=document.getElementById('nc-name').value.trim();if(!name){toast('Enter a client name.');return;}
+  const email=document.getElementById('nc-email').value.trim();
+  const notif=document.getElementById('nc-notif').value;
+  const frameio=document.getElementById('nc-frameio').value.trim();
+  const code=rk();
+  const {error}=await supabase.from('clients').insert({name,email:email||null,access_code:code,notif,frameio_link:frameio||null});
+  if(error){toast(error.message);return;}
+  await loadClients();
+  ['nc-name','nc-email','nc-frameio'].forEach(id=>document.getElementById(id).value='');
+  renderClientList();toast(`Code ${code} created for ${name}`);
+}
+function openEC(id){
+  const cl=S.clients.find(c=>c.id===id);if(!cl)return;
+  S.editingClientId=id;
+  document.getElementById('ec-name').value=cl.name;
+  document.getElementById('ec-email').value=cl.email||'';
+  document.getElementById('ec-frameio').value=cl.frameio||'';
+  document.getElementById('ec-code').value=cl.code;
+  document.getElementById('ec-notif').value=cl.notif||'all';
+  document.getElementById('ecMbg').classList.add('open');
+}
+function closeEC(){document.getElementById('ecMbg').classList.remove('open');S.editingClientId=null;}
+async function saveClient(){
+  if(!supabase)return;
+  const cl=S.clients.find(c=>c.id===S.editingClientId);if(!cl)return;
+  const {error}=await supabase.from('clients').update({
+    name:document.getElementById('ec-name').value.trim()||cl.name,
+    email:document.getElementById('ec-email').value.trim()||null,
+    frameio_link:document.getElementById('ec-frameio').value.trim()||null,
+    notif:document.getElementById('ec-notif').value,
+    access_code:document.getElementById('ec-code').value.trim()||cl.code,
+  }).eq('id',cl.id);
+  if(error){toast(error.message);return;}
+  await loadClients();await loadCards();
+  closeEC();renderClientList();toast('Client saved');
+}
+async function deleteClient(){
+  if(!confirm('Delete this client? Their access code will no longer work.'))return;
+  if(!supabase)return;
+  const {error}=await supabase.from('clients').delete().eq('id',S.editingClientId);
+  if(error){toast(error.message);return;}
+  await loadClients();await loadCards();
+  closeEC();renderClientList();toast('Client deleted');
+}
+// Zapier inbound email-matching (called when webhook fires)
+function zapierMatchClient(email,name){
+  let cl=clientByEmail(email);
+  if(cl)return cl;
+  // Create new client
+  const code=rk();
+  cl={id:'c'+S.nextClientId++,name:name||email,email,code,notif:'all',frameio:''};
+  S.clients.push(cl);
+  renderClientList();
+  return cl;
+}
+
+// ─── WEBHOOKS ────────────────────────────────────────────────────────
+function renderWH(){document.getElementById('whRows').innerHTML=S.webhooks.map(w=>`<div class="wh-row"><div style="width:7px;height:7px;border-radius:50%;background:${w.on?'var(--green)':'var(--text4)'};flex-shrink:0;"></div><div class="wh-url" title="${w.url}">${w.url}</div><span class="wh-badge">${w.ev}</span><button class="wh-del" onclick="removeWH('${w.id}')">×</button></div>`).join('')||'<div class="empty" style="padding:6px 0;">No webhooks.</div>';}
+async function addWH(){if(!supabase)return;const url=document.getElementById('wh-url').value.trim();const ev=document.getElementById('wh-ev').value;if(!url){toast('Enter a URL.');return;}const {error}=await supabase.from('webhooks').insert({url,event:ev,active:true});if(error){toast(error.message);return;}await loadWebhooks();document.getElementById('wh-url').value='';renderWH();toast('Webhook added');}
+async function removeWH(id){if(!supabase)return;const {error}=await supabase.from('webhooks').delete().eq('id',id);if(error){toast(error.message);return;}await loadWebhooks();renderWH();}
+function testWH(){const url=document.getElementById('wh-url').value.trim();if(!url){toast('Enter URL first.');return;}fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'test',timestamp:new Date().toISOString()})}).catch(()=>{});toast('Test fired!');}
+function fireWH(ev,data){S.webhooks.filter(w=>w.on&&(w.ev===ev||w.ev==='* all events')).forEach(w=>fetch(w.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:ev,...data,timestamp:new Date().toISOString()})}).catch(()=>{}));}
+function cpyWH(){navigator.clipboard?.writeText('https://app.lumavisuals.co/api/wh/inbound/YOUR_KEY').then(()=>toast('Copied!'));}
+
+// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────
+function onClientInput(){
+  const val=document.getElementById('f-client').value.trim().toLowerCase();
+  const list=document.getElementById('acList');
+  if(!val){list.classList.remove('open');return;}
+  const matches=S.clients.filter(c=>c.name.toLowerCase().includes(val)||c.email.toLowerCase().includes(val));
+  if(!matches.length){list.classList.remove('open');return;}
+  list.innerHTML=matches.map(c=>`<div class="ac-item" onmousedown="selectClient('${c.id}')">${avEl(c.name,avc(c.name),22)}<div><div class="ac-name">${c.name}</div><div class="ac-meta">${c.code}${c.email?' · '+c.email:''}</div></div></div>`).join('');
+  list.classList.add('open');
+}
+function selectClient(id){
+  const cl=S.clients.find(c=>c.id===id);if(!cl)return;
+  document.getElementById('f-client').value=cl.name;
+  document.getElementById('f-code').value=cl.code;
+  if(cl.frameio)document.getElementById('f-frameio').value=cl.frameio;
+  document.getElementById('acList').classList.remove('open');
+}
+function closeAC(){document.getElementById('acList').classList.remove('open');}
+
+// ─── CARD MODAL ───────────────────────────────────────────────────────
+function openNewCard(defStatus){
+  S.eid=null;
+  document.getElementById('mTitle').textContent='New Card';
+  document.getElementById('delBtn').style.display='none';
+  document.getElementById('archBtn').style.display='none';
+  ['f-title','f-client','f-color','f-frameio','f-code','f-tip','f-training'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-type').value='signature-timeless';
+  document.getElementById('f-ed').value='';
+  document.getElementById('f-music').value='Included';
+  document.getElementById('f-property').value='no';
+  document.getElementById('f-payroll').checked=false;
+  document.getElementById('payrollDateTxt').style.display='none';
+  document.getElementById('fioSaved').style.display='none';
+  document.getElementById('rev-complete-row').style.display='none';
+  const t=today();
+  document.getElementById('f-shootdate').value=t;
+  document.getElementById('f-deadline').value=t;
+  cc={client:[]};
+  unlockFields();renderSF(defStatus||'not_started');renderChatMsgs();
+  document.getElementById('tl-section').style.display='none';
+  document.getElementById('mbg').classList.add('open');
+}
+function openEdit(id){
+  const c=S.cards.find(x=>x.id===id);if(!c)return;
+  S.eid=id;const admin=isAdmin();
+  document.getElementById('mTitle').textContent=c.title||'Card';
+  document.getElementById('delBtn').style.display=admin?'block':'none';
+  document.getElementById('archBtn').style.display=admin?'block':'none';
+  document.getElementById('archBtn').textContent=c.archived?'Unarchive':'Archive';
+  const editable=['f-title','f-type','f-ed','f-shootdate','f-deadline','f-color','f-music','f-property','f-notes'];
+  editable.forEach(fid=>{const el=document.getElementById(fid);if(el)el.disabled=!admin;});
+  document.getElementById('f-title').value=c.title||'';
+  document.getElementById('f-client').value=c.client||'';
+  document.getElementById('f-type').value=c.type||'signature-timeless';
+  document.getElementById('f-ed').value=c.editor||'';
+  document.getElementById('f-shootdate').value=c.shootdate||'';
+  document.getElementById('f-deadline').value=c.deadline||'';
+  document.getElementById('f-color').value=c.color||'';
+  document.getElementById('f-music').value=c.music||'Included';
+  document.getElementById('f-property').value=c.property||'no';
+  document.getElementById('f-tip').value=c.tip!=null?c.tip:'';
+  document.getElementById('tipROBox').textContent=`$${Number(c.tip||0).toFixed(2)}`;
+  document.getElementById('f-notes').value=c.notes||'';
+  document.getElementById('f-frameio').value=c.frameio||'';
+  document.getElementById('f-code').value=c.code||'';
+  document.getElementById('f-payroll').checked=c.payroll||false;
+  document.getElementById('fioSaved').style.display=c.frameio?'block':'none';
+  // Payroll date display
+  if(c.payroll&&c.payrollDate){document.getElementById('payrollDateTxt').style.display='block';document.getElementById('payrollDateTxt').textContent='Marked: '+fd(c.payrollDate);}
+  else document.getElementById('payrollDateTxt').style.display='none';
+  // Editor payroll badge
+  if(!admin){const pb=document.getElementById('payrollEditorBadge');if(c.payroll){pb.style.background='rgba(74,124,89,.15)';pb.style.color='#4a9c6a';pb.textContent='✓ Added to payroll';}else{pb.style.background='var(--s3)';pb.style.color='var(--text3)';pb.textContent='Not yet added to payroll';}}
+  // Training field (admin only - per editor per period)
+  if(admin&&document.getElementById('f-training')){
+    const period=currPKey();const edId=c.editor;
+    const hrs=edId?((S.trainingHours[edId]||{})[period])||0:0;
+    document.getElementById('f-training').value=hrs>0?hrs:'';
+  }
+  // Revision complete button (shown if revision status)
+  const rcRow=document.getElementById('rev-complete-row');
+  if(c.status==='revision'){
+    rcRow.style.display='block';
+    rcRow.innerHTML=c.revisionComplete
+      ?`<div class="rev-btn rev-btn-done">✓ Revision marked complete</div>`
+      :`<button class="rev-btn rev-btn-do" onclick="markRevComplete()">Mark Revision Complete</button>`;
+  } else {
+    rcRow.style.display='none';
+  }
+  // Timeline
+  if(c.timeline&&c.timeline.length){
+    document.getElementById('tl-section').style.display='block';
+    const tlWrap=document.getElementById('tlWrap');
+    tlWrap.innerHTML=c.timeline.map(t=>{const st=stById(t.status);return `<div class="tl-item"><div class="tl-dot" style="background:${st.color}">${st.label[0]}</div><div class="tl-content"><div class="tl-label">${st.label}</div><div class="tl-meta">${fd(t.date)}</div></div></div>`;}).join('');
+  } else document.getElementById('tl-section').style.display='none';
+  cc=JSON.parse(JSON.stringify(c.chat||{client:[]}));
+  renderSF(c.status);renderChatMsgs();
+  document.getElementById('mbg').classList.add('open');
+}
+async function markRevComplete(){
+  const c=S.cards.find(x=>x.id===S.eid);if(!c)return;
+  c.revisionComplete=true;
+  if(supabase){await supabase.from('cards').update({revision_complete:true}).eq('id',c.id);}
+  fireWH('revision.done',{card_id:c.id,title:c.title,client:c.client});
+  document.getElementById('rev-complete-row').innerHTML=`<div class="rev-btn rev-btn-done">✓ Revision marked complete</div>`;
+  toast('Revision marked complete!','#27ae60');
+}
+function renderSF(cur){
+  document.getElementById('sf').dataset.cur=cur;
+  document.getElementById('sf').innerHTML=STATUSES.map(s=>`<div class="sf-step ${s.id===cur?'on':''}" style="${s.id===cur?`background:${s.color};border-color:${s.color};color:#fff;`:`border-color:${s.color}33;color:${s.color};`}" onclick="${isAdmin()?`selSt('${s.id}')`:''}">${s.label}</div>`).join('');
+  if(!isAdmin())document.querySelectorAll('.sf-step').forEach(el=>el.style.cursor='default');
+}
+function selSt(id){document.getElementById('sf').dataset.cur=id;document.querySelectorAll('.sf-step').forEach((el,i)=>{const s=STATUSES[i];el.className='sf-step'+(s.id===id?' on':'');el.style.cssText=s.id===id?`background:${s.color};border-color:${s.color};color:#fff;`:`border-color:${s.color}33;color:${s.color};background:var(--s3);`;});}
+function onFIO(){document.getElementById('fioSaved').style.display=document.getElementById('f-frameio').value.trim()?'block':'none';}
+function openFIO(){const url=document.getElementById('f-frameio').value.trim();if(url)window.open(url,'_blank');else toast('Enter a Frame.io URL first.');}
+function onPayrollChange(){const checked=document.getElementById('f-payroll').checked;const pd=document.getElementById('payrollDateTxt');if(checked){pd.style.display='block';pd.textContent='Will be marked: '+fd(today());}else pd.style.display='none';}
+function unlockFields(){['f-title','f-type','f-ed','f-shootdate','f-deadline','f-color','f-music','f-property','f-notes'].forEach(fid=>{const el=document.getElementById(fid);if(el)el.disabled=false;});}
+async function saveCard(){
+  if(!supabase){toast('Not connected to Supabase');return;}
+  const title=document.getElementById('f-title').value.trim();if(!title){toast('Enter a project name.');return;}
+  const admin=isAdmin();
+  const status=document.getElementById('sf').dataset.cur||'not_started';
+  const payroll=document.getElementById('f-payroll').checked;
+  const clientName=document.getElementById('f-client').value.trim()||'Unknown';
+  const cl=clientByName(clientName)||{code:''};
+  const data={title,client:clientName,type:document.getElementById('f-type').value,status,editor:document.getElementById('f-ed').value,shootdate:document.getElementById('f-shootdate').value,deadline:document.getElementById('f-deadline').value,color:document.getElementById('f-color').value.trim(),music:document.getElementById('f-music').value,property:document.getElementById('f-property').value,notes:document.getElementById('f-notes').value.trim(),frameio:document.getElementById('f-frameio').value.trim(),payroll,payrollDate:payroll?today():null,code:cl.code||document.getElementById('f-code').value,chat:JSON.parse(JSON.stringify(cc))};
+  if(admin)data.tip=parseFloat(document.getElementById('f-tip').value)||0;
+  if(admin&&data.editor){const period=currPKey();const hrs=parseFloat(document.getElementById('f-training').value)||0;if(!S.trainingHours[data.editor])S.trainingHours[data.editor]={};S.trainingHours[data.editor][period]=hrs;}
+  if(S.eid){
+    const i=S.cards.findIndex(x=>x.id===S.eid);const old=S.cards[i];
+    const wasPayroll=old.payroll;
+    S.cards[i]={...old,...data,...(admin?{}:{tip:old.tip}),revisionComplete:old.revisionComplete||false,timeline:old.timeline||[]};
+    if(old.status!==status){addTLEntry(S.cards[i],status);fireWH('card.status_changed',{card_id:old.id,old_status:old.status,new_status:status,title:old.title});}
+    if(!wasPayroll&&payroll)fireWH('payroll.marked',{card_id:old.id,title:old.title,editor:data.editor});
+    const {error}=await supabase.from('cards').update(cardToPayload(S.cards[i])).eq('id',S.eid);
+    if(error){toast(error.message);return;}
+    if(admin&&data.editor){const period=currPKey();const hrs=parseFloat(document.getElementById('f-training').value)||0;const dbId=editorDbId(data.editor);if(dbId)await supabase.from('training_hours').upsert({editor_id:dbId,period_key:period,hours:hrs},{onConflict:'editor_id,period_key'});}
+    toast('Card saved');
+  } else {
+    const card={...data,tip:admin?(parseFloat(document.getElementById('f-tip').value)||0):0,archived:false,revisionComplete:false,timeline:[{status,date:today()}]};
+    const {data:row,error}=await supabase.from('cards').insert(cardToPayload(card)).select('*, editors(legacy_key), clients(access_code)').single();
+    if(error){toast(error.message);return;}
+    S.cards.push(rowToCard(row));fireWH('card.created',{card_id:row.id,title:card.title,client:card.client,type:card.type});
+    if(admin&&data.editor){const period=currPKey();const hrs=parseFloat(document.getElementById('f-training').value)||0;const dbId=editorDbId(data.editor);if(dbId)await supabase.from('training_hours').upsert({editor_id:dbId,period_key:period,hours:hrs},{onConflict:'editor_id,period_key'});}
+    toast('Card created');
+  }
+  closeM();renderBoard();renderSidebar();if(admin)renderAdminPayroll();
+}
+async function deleteCard(){if(!confirm('Delete permanently?'))return;if(!supabase)return;const {error}=await supabase.from('cards').delete().eq('id',S.eid);if(error){toast(error.message);return;}S.cards=S.cards.filter(c=>c.id!==S.eid);closeM();renderBoard();renderSidebar();toast('Deleted.');}
+async function archiveCard(){const c=S.cards.find(x=>x.id===S.eid);if(!c)return;if(!supabase)return;const next=!c.archived;const {error}=await supabase.from('cards').update({archived:next}).eq('id',c.id);if(error){toast(error.message);return;}c.archived=next;closeM();renderBoard();renderSidebar();renderArchive();toast(c.archived?'Archived':'Restored');}
+function closeM(){document.getElementById('mbg').classList.remove('open');unlockFields();closeAC();}
+function closeMOut(e){if(e.target===document.getElementById('mbg'))closeM();}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────
+function renderChatMsgs(){const msgs=cc.client||[];const box=document.getElementById('chatBox');box.innerHTML=msgs.length?msgs.map(m=>`<div class="msg">${avEl(m.from,m.c||avc(m.from),20)}<div style="flex:1;"><span class="msg-from">${m.from}</span> <span class="msg-time">${m.time}</span><div class="msg-text">${m.text}</div></div></div>`).join(''):`<div class="empty" style="padding:10px 0;">No messages yet</div>`;box.scrollTop=box.scrollHeight;}
+async function sendMsg(){const input=document.getElementById('chatIn');const text=input.value.trim();if(!text)return;const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});if(!cc.client)cc.client=[];cc.client.push({from:'Luma Visuals',text,time:now,c:'#4a7c59'});if(S.eid){const c=S.cards.find(x=>x.id===S.eid);if(c){c.chat=JSON.parse(JSON.stringify(cc));if(supabase)await supabase.from('cards').update({chat:c.chat}).eq('id',c.id);fireWH('chat.message_sent',{card_id:c.id,title:c.title,client:c.client,message:text});}}input.value='';renderChatMsgs();toast('Message sent');}
+
+// ─── CLIENT PORTAL ────────────────────────────────────────────────────
+function openPortal(){delete window._portalCode;document.getElementById('portalBg').classList.add('open');document.getElementById('pLoginBox').style.display='block';document.getElementById('pDash').style.display='none';document.getElementById('pCode').value='';document.getElementById('pErr').style.display='none';renderSavedChips('pSavedCodes','pCode');}
+function openPortalDirect(code,cl){
+  window._portalCode=code;
+  document.getElementById('portalBg').classList.add('open');
+  document.getElementById('pLoginBox').style.display='none';
+  renderPortalDash(code,cl);
+  document.getElementById('pDash').style.display='block';
+}
+function closePortal(){
+  if(typeof window._portalSessionRestore==='function'){window._portalSessionRestore();delete window._portalSessionRestore;}
+  delete window._portalCode;
+  document.getElementById('portalBg').classList.remove('open');
+}
+function pLogout(){
+  if(typeof window._portalSessionRestore==='function'){window._portalSessionRestore();delete window._portalSessionRestore;}
+  delete window._portalCode;
+  document.getElementById('pLoginBox').style.display='block';
+  document.getElementById('pDash').style.display='none';
+  renderSavedChips('pSavedCodes','pCode');
+}
+async function pLogin(){
+  const code=document.getElementById('pCode').value.trim().toUpperCase();
+  document.getElementById('pErr').style.display='none';
+  if(!supabase){toast('Configure Supabase');return;}
+  const {data:clInfo,error:e1}=await supabase.rpc('portal_client_by_code',{p_code:code});
+  if(e1||!clInfo){document.getElementById('pErr').style.display='block';return;}
+  const {data:cardsRaw,error:e2}=await supabase.rpc('portal_cards_by_code',{p_code:code});
+  if(e2){document.getElementById('pErr').style.display='block';return;}
+  const list=Array.isArray(cardsRaw)?cardsRaw:[];
+  const prev=S.cards;
+  S.cards=list.map(rowToCard);
+  window._portalSessionRestore=()=>{S.cards=prev;};
+  const cl={name:clInfo.name,code:clInfo.access_code,email:clInfo.email||'',frameio:clInfo.frameio_link||''};
+  saveCodeLS(code,cl.name);
+  openPortalDirect(code,cl);
+}
+function renderPortalDash(code,cl){
+  document.getElementById('pName').textContent=cl.name;
+  const clientCards=S.cards.filter(c=>c.code===code&&!c.archived);
+  const pCards=document.getElementById('pCards');
+  if(!clientCards.length){pCards.innerHTML='<div style="color:rgba(255,255,255,.35);text-align:center;padding:50px;font-size:14px;">No active projects yet.<br><span style="font-size:12px;opacity:.6;">Your Luma Visuals team will update you soon.</span></div>';return;}
+  pCards.innerHTML=clientCards.map(c=>{
+    const st=stById(c.status);const ti=typeInfo(c.type);const ed=edById(c.editor);const msgs=c.chat?.client||[];
+    const fio=c.frameio||cl.frameio;
+    return `<div class="p-proj-item" id="pi-${c.id}">
+      <div class="p-proj-hd" onclick="toggleProj('${c.id}')">
+        <div>
+          <div class="p-proj-title">${c.title}</div>
+          <div class="p-proj-sub">${ti.label}${c.shootdate?' · Shoot '+fd(c.shootdate):''}${ed?' · '+ed.name:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="p-pill" style="background:${st.color}22;color:${st.color};border:1px solid ${st.color}40;">${st.label}</span>
+          <span class="p-chevron" id="chev-${c.id}">▾</span>
+        </div>
+      </div>
+      <div class="p-proj-detail" id="pd-${c.id}">
+        <!-- Full project info (same as editor view) -->
+        <div class="p-detail-grid">
+          ${c.deadline?`<div class="p-field-group"><div class="p-fl">Deadline</div><div class="p-fv">${fd(c.deadline)}</div></div>`:''}
+          ${c.color?`<div class="p-field-group"><div class="p-fl">Color Profile</div><div class="p-fv">${c.color}</div></div>`:''}
+          ${c.music?`<div class="p-field-group"><div class="p-fl">Music</div><div class="p-fv">${c.music}</div></div>`:''}
+          <div class="p-field-group"><div class="p-fl">Property Shot</div><div class="p-fv">${c.property==='yes'?'Yes':'No'}</div></div>
+          ${ed?`<div class="p-field-group"><div class="p-fl">Your Editor</div><div class="p-fv">${ed.name}</div></div>`:''}
+        </div>
+        ${c.notes?`<div style="margin-bottom:14px;"><div class="p-fl" style="margin-bottom:5px;">Project Notes</div><div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;background:rgba(0,0,0,.2);border-radius:7px;padding:10px 13px;">${c.notes}</div></div>`:''}
+        <!-- Timeline -->
+        ${c.timeline&&c.timeline.length?`<div class="p-tl-wrap"><div class="p-tl-title">Project Timeline</div>${c.timeline.map(t=>{const s=stById(t.status);return `<div class="p-tl-item"><div class="p-tl-dot" style="background:${s.color}">${s.label[0]}</div><div><div class="p-tl-label">${s.label}</div><div class="p-tl-meta">${fd(t.date)}</div></div></div>`;}).join('')}</div>`:''}
+        <!-- Frame.io -->
+        ${fio?`<div class="p-fio" onclick="window.open('${fio}','_blank')"><div style="width:34px;height:34px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🎬</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#fff;">View Your Edits on Frame.io</div><div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;">Click to open your review link</div></div><span style="color:rgba(255,255,255,.4);">→</span></div>`:''}
+        <!-- Revision request -->
+        <div class="p-rev-section">
+          <div class="p-rev-title">Request a Revision</div>
+          <textarea class="p-rev-inp" id="rev-inp-${c.id}" placeholder="Describe what you'd like changed..."></textarea>
+          <button class="p-rev-btn" onclick="submitRevision('${c.id}','${code}',${JSON.stringify(cl.name)})">Submit Revision Request</button>
+        </div>
+        <!-- Messages -->
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Messages</div>
+        <div class="p-chat-box">${msgs.length?msgs.map(m=>`<div class="msg">${avEl(m.from,m.c||avc(m.from),20)}<div style="flex:1;"><span class="msg-from" style="color:rgba(255,255,255,.4);">${m.from}</span> <span class="msg-time" style="color:rgba(255,255,255,.25);">${m.time}</span><div class="msg-text" style="color:rgba(255,255,255,.8);">${m.text}</div></div></div>`).join(''):'<div style="color:rgba(255,255,255,.25);font-size:11px;text-align:center;padding:10px 0;">No messages yet</div>'}</div>
+        <div class="p-ci"><input id="pc-${c.id}" placeholder="Message your Luma Visuals team..."/><button class="p-ci-btn" onclick="pSendMsg('${c.id}','${code}',${JSON.stringify(cl.name)})">Send</button></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleProj(id){
+  const detail=document.getElementById('pd-'+id);const chev=document.getElementById('chev-'+id);const item=document.getElementById('pi-'+id);
+  const isOpen=detail.classList.contains('open');
+  detail.classList.toggle('open',!isOpen);
+  if(chev)chev.classList.toggle('up',!isOpen);
+  if(item)item.classList.toggle('open-detail',!isOpen);
+}
+async function submitRevision(cid,code,clientName){
+  const inp=document.getElementById('rev-inp-'+cid);const text=inp.value.trim();if(!text){toast('Enter revision details.');return;}
+  const c=S.cards.find(x=>x.id===cid);if(!c)return;
+  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if(!c.chat)c.chat={client:[]};
+  c.chat.client.push({from:clientName,text:`🔄 Revision request: ${text}`,time:now,c:avc(clientName)});
+  if(c.status!=='revision'){c.status='revision';addTLEntry(c,'revision');c.revisionComplete=false;fireWH('card.status_changed',{card_id:c.id,new_status:'revision'});}
+  if(supabase){const {error}=await supabase.rpc('portal_patch_card',{p_code:code,p_card_id:cid,p_patch:{chat:c.chat,timeline:c.timeline,status:c.status,revision_complete:c.revisionComplete}});if(error){toast(error.message);return;}}
+  fireWH('revision.requested',{card_id:c.id,title:c.title,client:clientName,notes:text});
+  inp.value='';
+  const cl=S.clients.find(x=>x.code===code)||{name:clientName,code};
+  renderPortalDash(code,cl);
+  toast('Revision request sent!');
+  setTimeout(()=>{toggleProj(cid);},100);
+}
+async function pSendMsg(cid,code,clientName){
+  const input=document.getElementById('pc-'+cid);const text=input.value.trim();if(!text)return;
+  const c=S.cards.find(x=>x.id===cid);if(!c)return;
+  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if(!c.chat)c.chat={client:[]};
+  c.chat.client.push({from:clientName,text,time:now,c:avc(clientName)});
+  if(supabase){const {error}=await supabase.rpc('portal_patch_card',{p_code:code,p_card_id:cid,p_patch:{chat:c.chat}});if(error){toast(error.message);return;}}
+  fireWH('chat.message_sent',{card_id:c.id,title:c.title,client:clientName,message:text});
+  input.value='';
+  const cl=S.clients.find(x=>x.code===code)||{name:clientName,code};
+  renderPortalDash(code,cl);
+  setTimeout(()=>toggleProj(cid),50);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+function populateEdSel(){document.getElementById('f-ed').innerHTML='<option value="">— unassigned —</option>'+S.editors.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');}
+document.addEventListener('DOMContentLoaded',()=>{
+  populateEdSel();
+  setLT('client',document.getElementById('lt-client'));
+  initSupabase();
+});
+</script>
+</body>
+</html>
