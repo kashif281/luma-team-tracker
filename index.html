@@ -733,6 +733,8 @@ function warnIfCardNotOnClientPortal(clientName){
   if(clientUuidForName(n))return;
   setTimeout(()=>toast('This client name is not in Client Directory — project will not appear in the client portal. Add the client under Admin or match the name exactly.'),400);
 }
+/** Escape for use inside single-quoted JS args in inline onclick (JSON.stringify breaks HTML attributes). */
+function escPortalJs(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r\n|\r|\n/g,' ');}
 
 // ─── SUPABASE ─────────────────────────────────────────────────────────
 async function initSupabase(){
@@ -1475,12 +1477,12 @@ function renderPortalDash(code,cl){
         <div class="p-rev-section">
           <div class="p-rev-title">Request a Revision</div>
           <textarea class="p-rev-inp" id="rev-inp-${c.id}" placeholder="Describe what you'd like changed..."></textarea>
-          <button class="p-rev-btn" onclick="submitRevision('${c.id}','${code}',${JSON.stringify(cl.name)})">Submit Revision Request</button>
+          <button class="p-rev-btn" onclick="submitRevision('${escPortalJs(c.id)}','${escPortalJs(code)}','${escPortalJs(cl.name)}')">Submit Revision Request</button>
         </div>
         <!-- Messages -->
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Messages</div>
         <div class="p-chat-box">${msgs.length?msgs.map(m=>`<div class="msg">${avEl(m.from,m.c||avc(m.from),20)}<div style="flex:1;"><span class="msg-from" style="color:rgba(255,255,255,.4);">${m.from}</span> <span class="msg-time" style="color:rgba(255,255,255,.25);">${m.time}</span><div class="msg-text" style="color:rgba(255,255,255,.8);">${m.text}</div></div></div>`).join(''):'<div style="color:rgba(255,255,255,.25);font-size:11px;text-align:center;padding:10px 0;">No messages yet</div>'}</div>
-        <div class="p-ci"><input id="pc-${c.id}" placeholder="Message your Luma Visuals team..."/><button class="p-ci-btn" onclick="pSendMsg('${c.id}','${code}',${JSON.stringify(cl.name)})">Send</button></div>
+        <div class="p-ci"><input id="pc-${c.id}" placeholder="Message your Luma Visuals team..."/><button class="p-ci-btn" onclick="pSendMsg('${escPortalJs(c.id)}','${escPortalJs(code)}','${escPortalJs(cl.name)}')">Send</button></div>
       </div>
     </div>`;
   }).join('');
