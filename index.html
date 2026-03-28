@@ -314,6 +314,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .empty{color:var(--text4);font-size:11px;padding:18px;text-align:center;}
+.lhint{font-size:11px;color:var(--text4);line-height:1.4;margin:-4px 0 12px;max-width:300px;text-align:center;}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
 .divider{height:1px;background:var(--border);margin:10px 0;}
@@ -335,8 +336,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
     </div>
     <!-- CLIENT LOGIN -->
     <div id="clientLoginDiv">
+      <p class="lhint">For <strong>clients</strong> only: use the project access code Luma sent you. Team editors sign in on the <strong>Team Login</strong> tab (email + password).</p>
       <div id="loginSavedCodes"></div>
-      <div class="lf"><label>Access Code</label>
+      <div class="lf"><label>Client access code</label>
         <input id="cl-code" style="text-align:center;letter-spacing:3px;font-weight:700;font-size:15px;" onkeydown="if(event.key==='Enter')doClientLogin()" oninput="this.value=this.value.toUpperCase()"/>
       </div>
       <button class="lbtn" onclick="doClientLogin()">View My Projects</button>
@@ -344,6 +346,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
     </div>
     <!-- TEAM LOGIN (Supabase Auth — email + password) -->
     <div id="teamLogin" style="display:none;">
+      <p class="lhint">Editors &amp; admins: your Supabase account. New editors need <code style="font-size:10px;">user_metadata.editor_id</code> set to their row key (e.g. <code style="font-size:10px;">e8</code>) in the dashboard.</p>
       <div id="step1">
         <div class="lf"><label>Email</label><input type="email" id="li-email" autocomplete="username" placeholder="you@lumavisuals.co" onkeydown="if(event.key==='Enter')teamSignIn()"/></div>
         <div class="lf"><label>Password</label><input type="password" id="li-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')teamSignIn()"/></div>
@@ -507,8 +510,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
     <div class="p-lv">LV</div>
     <div class="p-brand">Luma <span>Visuals</span></div>
     <div class="p-tag">Your creative projects, all in one place</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;max-width:280px;margin-bottom:10px;line-height:1.35;">Use your <strong>client</strong> access code from Luma (not an editor login).</div>
     <div id="pSavedCodes"></div>
-    <input class="p-inp" id="pCode" placeholder="Enter access code" maxlength="8" onkeydown="if(event.key==='Enter')pLogin()" oninput="this.value=this.value.toUpperCase()"/>
+    <input class="p-inp" id="pCode" placeholder="Client access code" maxlength="8" onkeydown="if(event.key==='Enter')pLogin()" oninput="this.value=this.value.toUpperCase()"/>
     <button class="p-btn" onclick="pLogin()">View My Projects</button>
     <div class="p-err" id="pErr">Invalid code. Contact your Luma Visuals team.</div>
     <button class="p-back" onclick="closePortal()">← Back</button>
@@ -718,6 +722,12 @@ function typeInfo(tid){return TYPE_MAP[tid]||{label:'Unknown',cat:'simple'};}
 function typeCat(tid){return typeInfo(tid).cat;}
 function isAdmin(){return S.role==='admin';}
 function today(){return new Date().toISOString().split('T')[0];}
+function warnIfCardNotOnClientPortal(clientName){
+  const n=(clientName||'').trim();
+  if(!n||n.toLowerCase()==='unknown')return;
+  if(clientUuidForName(n))return;
+  setTimeout(()=>toast('This client name is not in Client Directory — project will not appear in the client portal. Add the client under Admin or match the name exactly.'),400);
+}
 
 // ─── SUPABASE ─────────────────────────────────────────────────────────
 async function initSupabase(){
@@ -1334,14 +1344,14 @@ async function saveCard(){
     const {error}=await supabase.from('cards').update(cardToPayload(S.cards[i])).eq('id',S.eid);
     if(error){toast(error.message);return;}
     if(admin&&data.editor){const period=currPKey();const hrs=parseFloat(document.getElementById('f-training').value)||0;const dbId=editorDbId(data.editor);if(dbId)await supabase.from('training_hours').upsert({editor_id:dbId,period_key:period,hours:hrs},{onConflict:'editor_id,period_key'});}
-    toast('Card saved');
+    toast('Card saved');warnIfCardNotOnClientPortal(clientName);
   } else {
     const card={...data,tip:admin?(parseFloat(document.getElementById('f-tip').value)||0):0,archived:false,revisionComplete:false,timeline:[{status,date:today()}]};
     const {data:row,error}=await supabase.from('cards').insert(cardToPayload(card)).select('*, editors(legacy_key), clients(access_code)').single();
     if(error){toast(error.message);return;}
     S.cards.push(rowToCard(row));fireWH('card.created',{card_id:row.id,title:card.title,client:card.client,type:card.type});
     if(admin&&data.editor){const period=currPKey();const hrs=parseFloat(document.getElementById('f-training').value)||0;const dbId=editorDbId(data.editor);if(dbId)await supabase.from('training_hours').upsert({editor_id:dbId,period_key:period,hours:hrs},{onConflict:'editor_id,period_key'});}
-    toast('Card created');
+    toast('Card created');warnIfCardNotOnClientPortal(clientName);
   }
   closeM();renderBoard();renderSidebar();if(admin)renderAdminPayroll();
 }
@@ -1367,6 +1377,14 @@ function closePortal(){
   if(typeof window._portalSessionRestore==='function'){window._portalSessionRestore();delete window._portalSessionRestore;}
   delete window._portalCode;
   document.getElementById('portalBg').classList.remove('open');
+  document.getElementById('pLoginBox').style.display='block';
+  document.getElementById('pDash').style.display='none';
+  document.getElementById('pErr').style.display='none';
+  // Client-only flow hid the main login screen; team users never hide it while using the board.
+  if(!S.role){
+    document.getElementById('loginScreen').classList.remove('hidden');
+    setLT('client',document.getElementById('lt-client'));
+  }
 }
 function pLogout(){
   if(typeof window._portalSessionRestore==='function'){window._portalSessionRestore();delete window._portalSessionRestore;}
