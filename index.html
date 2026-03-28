@@ -198,6 +198,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .mfoot{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .field{display:flex;flex-direction:column;gap:4px;}
 .field label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.field-hint{font-size:10px;color:var(--text4);line-height:1.4;margin-top:6px;max-width:340px;}
 .field input,.field select,.field textarea{background:var(--s3);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:8px 11px;font-family:var(--font);font-size:12px;outline:none;transition:border-color .14s;}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);}
 .field input:disabled,.field select:disabled,.field textarea:disabled{opacity:.6;cursor:not-allowed;}
@@ -446,6 +447,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
             <div class="field"><label>Signature ($)</label><input id="ne-sig" type="number"/></div>
             <div class="field"><label>Simple ($)</label><input id="ne-sim" type="number"/></div>
           </div>
+          <p style="font-size:10px;color:var(--text4);line-height:1.45;margin:0 0 10px;max-width:520px;">Editors never use the client access-code screen. After adding, create a Supabase Auth user for their email and set <code style="font-size:9px;">user_metadata.editor_id</code> to the key shown in the toast (e.g. <code style="font-size:9px;">e8</code>).</p>
           <button class="tbtn tbtn-green tbtn-sm" onclick="addEditor()">Add Editor</button>
         </div>
 
@@ -542,8 +544,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
     <div class="mcols">
       <div class="field"><label>Client Name</label>
         <div class="ac-wrap"><input id="f-client" autocomplete="off" oninput="onClientInput()" onblur="setTimeout(closeAC,170)" onfocus="onClientInput()"/><div class="ac-list" id="acList"></div></div>
+        <div class="field-hint">Client <strong>portal</strong> lists this card only when this name matches a row in <strong>Admin → Client Directory</strong> (the code there is what the customer enters).</div>
       </div>
-      <div class="field"><label>Assign Editor</label><select id="f-ed"><option value="">— unassigned —</option></select></div>
+      <div class="field"><label>Assign Editor</label><select id="f-ed"><option value="">— unassigned —</option></select>
+        <div class="field-hint"><strong>Team</strong> only: editors sign in on the <strong>Team Login</strong> tab with email + password. Assigning an editor does <em>not</em> create a client portal code.</div>
+      </div>
     </div>
     <div class="mcols">
       <div class="field"><label>Shoot Date</label><input type="date" id="f-shootdate"/></div>
@@ -759,17 +764,40 @@ async function loadClients(){
   if(error){console.error(error);return;}
   S.clients=(data||[]).map(c=>({id:c.id,name:c.name,email:c.email||'',code:c.access_code,notif:c.notif||'all',frameio:c.frameio_link||''}));
 }
+function parsePortalCardsRpc(raw){
+  if(raw==null)return[];
+  if(Array.isArray(raw))return raw;
+  if(typeof raw==='string'){
+    try{const j=JSON.parse(raw);return Array.isArray(j)?j:(j&&typeof j==='object'?[j]:[]);}catch(e){return[];}
+  }
+  if(typeof raw==='object')return[raw];
+  return[];
+}
 function rowToCard(row){
-  const chat=row.chat&&typeof row.chat==='object'?JSON.parse(JSON.stringify(row.chat)):{client:[]};
+  let chatRaw=row.chat;
+  if(typeof chatRaw==='string'){try{chatRaw=JSON.parse(chatRaw);}catch(e){chatRaw=null;}}
+  const chat=chatRaw&&typeof chatRaw==='object'?JSON.parse(JSON.stringify(chatRaw)):{client:[]};
   if(!chat.client)chat.client=[];
+  // Supabase join select uses client_name + nested clients/editors; portal RPC returns flat client, code, editor, etc.
+  const clientLabel=(row.client_name!=null&&row.client_name!=='')?row.client_name:(row.client||'');
+  const codeRaw=row.code!=null&&row.code!==''?row.code:(row.clients?.access_code||'');
+  const codeVal=String(codeRaw).trim();
+  const editorVal=(row.editor!=null&&row.editor!=='')?row.editor:(row.editors?.legacy_key||'');
+  const shoot=row.shootdate!=null&&row.shootdate!==''?row.shootdate:(row.shoot_date||'');
+  const colorVal=(row.color!=null&&row.color!=='')?row.color:(row.color_profile||'');
+  const musicVal=(row.music!=null&&row.music!=='')?row.music:(row.music_type||'Included');
+  const propVal=typeof row.property==='string'?row.property:(row.is_property?'yes':'no');
+  const frameioVal=(row.frameio!=null&&row.frameio!=='')?row.frameio:(row.frameio_link||'');
+  const payDate=row.payrollDate!=null?row.payrollDate:row.payroll_date;
+  const rev=row.revisionComplete??row.revision_complete;
   return{
-    id:row.id,title:row.title||'',client:row.client_name||'',status:row.status||'not_started',
-    editor:row.editors?.legacy_key||'',type:row.type||'signature-timeless',
-    shootdate:row.shoot_date||'',deadline:row.deadline||'',color:row.color_profile||'',
-    music:row.music_type||'Included',property:row.is_property?'yes':'no',tip:Number(row.tip)||0,
-    notes:row.notes||'',frameio:row.frameio_link||'',code:row.clients?.access_code||'',
-    payroll:!!row.payroll,payrollDate:row.payroll_date||null,archived:!!row.archived,
-    chat,revisionComplete:!!(row.revision_complete??row.revisionComplete),timeline:Array.isArray(row.timeline)?row.timeline:[],
+    id:row.id,title:row.title||'',client:clientLabel,status:row.status||'not_started',
+    editor:editorVal,type:row.type||'signature-timeless',
+    shootdate:shoot,deadline:row.deadline||'',color:colorVal,
+    music:musicVal,property:propVal,tip:Number(row.tip)||0,
+    notes:row.notes||'',frameio:frameioVal,code:codeVal,
+    payroll:!!row.payroll,payrollDate:payDate||null,archived:!!row.archived,
+    chat,revisionComplete:!!rev,timeline:Array.isArray(row.timeline)?row.timeline:[],
   };
 }
 async function loadCards(){
@@ -876,7 +904,7 @@ async function doClientLogin(){
   if(e1||!clInfo){document.getElementById('clientErr').style.display='block';return;}
   const {data:cardsRaw,error:e2}=await supabase.rpc('portal_cards_by_code',{p_code:code});
   if(e2){document.getElementById('clientErr').style.display='block';return;}
-  const list=Array.isArray(cardsRaw)?cardsRaw:[];
+  const list=parsePortalCardsRpc(cardsRaw);
   const prev=S.cards;
   S.cards=list.map(rowToCard);
   const cl={name:clInfo.name,code:clInfo.access_code,email:clInfo.email||'',frameio:clInfo.frameio_link||''};
@@ -1103,7 +1131,7 @@ async function addEditor(){
   const {error}=await supabase.from('editors').insert({name,email,color:cols[n%cols.length],rate_signature:sig,rate_simple:sim,rate_training:20,legacy_key}).select().single();
   if(error){toast(error.message);return;}
   ['ne-name','ne-email','ne-pass','ne-sig','ne-sim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  await loadEditors();renderRatesGrid();renderSidebar();populateEdSel();toast(`${name} added — set Auth user_metadata editor_id to ${legacy_key}`);
+  await loadEditors();renderRatesGrid();renderSidebar();populateEdSel();toast(`${name} added — Team Login: create Auth user + set editor_id "${legacy_key}". No client portal code.`);
 }
 async function removeEditor(dbId){if(!confirm('Remove this editor?'))return;if(!supabase)return;const {error}=await supabase.from('editors').delete().eq('id',dbId);if(error){toast(error.message);return;}await loadEditors();renderRatesGrid();renderSidebar();populateEdSel();}
 function renderAdminPayroll(){
@@ -1401,7 +1429,7 @@ async function pLogin(){
   if(e1||!clInfo){document.getElementById('pErr').style.display='block';return;}
   const {data:cardsRaw,error:e2}=await supabase.rpc('portal_cards_by_code',{p_code:code});
   if(e2){document.getElementById('pErr').style.display='block';return;}
-  const list=Array.isArray(cardsRaw)?cardsRaw:[];
+  const list=parsePortalCardsRpc(cardsRaw);
   const prev=S.cards;
   S.cards=list.map(rowToCard);
   window._portalSessionRestore=()=>{S.cards=prev;};
@@ -1411,7 +1439,8 @@ async function pLogin(){
 }
 function renderPortalDash(code,cl){
   document.getElementById('pName').textContent=cl.name;
-  const clientCards=S.cards.filter(c=>c.code===code&&!c.archived);
+  // S.cards was just replaced with portal_cards_by_code results — already scoped to this client; only hide archived.
+  const clientCards=S.cards.filter(c=>!c.archived);
   const pCards=document.getElementById('pCards');
   if(!clientCards.length){pCards.innerHTML='<div style="color:rgba(255,255,255,.35);text-align:center;padding:50px;font-size:14px;">No active projects yet.<br><span style="font-size:12px;opacity:.6;">Your Luma Visuals team will update you soon.</span></div>';return;}
   pCards.innerHTML=clientCards.map(c=>{
